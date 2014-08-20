@@ -1,0 +1,306 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		F8708922199D13E3000DECCA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F8708920199D13E3000DECCA /* InfoPlist.strings */; };
+		F870892B199D1469000DECCA /* SLSpeakIt.m in Sources */ = {isa = PBXBuildFile; fileRef = F870892A199D1469000DECCA /* SLSpeakIt.m */; };
+		F8FDDBA119A29029007CBD26 /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F8FDDBA019A29029007CBD26 /* CoreText.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		F8708914199D13E3000DECCA /* SLSpeakItPlugin.xcplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SLSpeakItPlugin.xcplugin; sourceTree = BUILT_PRODUCTS_DIR; };
+		F870891A199D13E3000DECCA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		F870891C199D13E3000DECCA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		F870891F199D13E3000DECCA /* SLSpeakItPlugin-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "SLSpeakItPlugin-Info.plist"; sourceTree = "<group>"; };
+		F8708921199D13E3000DECCA /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		F8708923199D13E3000DECCA /* SLSpeakItPlugin-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SLSpeakItPlugin-Prefix.pch"; sourceTree = "<group>"; };
+		F8708929199D1469000DECCA /* SLSpeakIt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SLSpeakIt.h; sourceTree = "<group>"; };
+		F870892A199D1469000DECCA /* SLSpeakIt.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SLSpeakIt.m; sourceTree = "<group>"; };
+		F8FDDBA019A29029007CBD26 /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F8708911199D13E3000DECCA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F8FDDBA119A29029007CBD26 /* CoreText.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		F870890B199D13E3000DECCA = {
+			isa = PBXGroup;
+			children = (
+				F870891D199D13E3000DECCA /* SLSpeakItPlugin */,
+				F8708916199D13E3000DECCA /* Frameworks */,
+				F8708915199D13E3000DECCA /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F8708915199D13E3000DECCA /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F8708914199D13E3000DECCA /* SLSpeakItPlugin.xcplugin */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F8708916199D13E3000DECCA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F8FDDBA019A29029007CBD26 /* CoreText.framework */,
+				F8708919199D13E3000DECCA /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F8708919199D13E3000DECCA /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F870891A199D13E3000DECCA /* Foundation.framework */,
+				F870891C199D13E3000DECCA /* AppKit.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		F870891D199D13E3000DECCA /* SLSpeakItPlugin */ = {
+			isa = PBXGroup;
+			children = (
+				F870891E199D13E3000DECCA /* Supporting Files */,
+				F8708929199D1469000DECCA /* SLSpeakIt.h */,
+				F870892A199D1469000DECCA /* SLSpeakIt.m */,
+			);
+			path = SLSpeakItPlugin;
+			sourceTree = "<group>";
+		};
+		F870891E199D13E3000DECCA /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				F870891F199D13E3000DECCA /* SLSpeakItPlugin-Info.plist */,
+				F8708920199D13E3000DECCA /* InfoPlist.strings */,
+				F8708923199D13E3000DECCA /* SLSpeakItPlugin-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F8708913199D13E3000DECCA /* SLSpeakItPlugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F8708926199D13E3000DECCA /* Build configuration list for PBXNativeTarget "SLSpeakItPlugin" */;
+			buildPhases = (
+				F8708910199D13E3000DECCA /* Sources */,
+				F8708911199D13E3000DECCA /* Frameworks */,
+				F8708912199D13E3000DECCA /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SLSpeakItPlugin;
+			productName = SLSpeakItPlugin;
+			productReference = F8708914199D13E3000DECCA /* SLSpeakItPlugin.xcplugin */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F870890C199D13E3000DECCA /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0510;
+				ORGANIZATIONNAME = SunLoveSystems;
+			};
+			buildConfigurationList = F870890F199D13E3000DECCA /* Build configuration list for PBXProject "SLSpeakItPlugin" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = F870890B199D13E3000DECCA;
+			productRefGroup = F8708915199D13E3000DECCA /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F8708913199D13E3000DECCA /* SLSpeakItPlugin */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F8708912199D13E3000DECCA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F8708922199D13E3000DECCA /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F8708910199D13E3000DECCA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F870892B199D1469000DECCA /* SLSpeakIt.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		F8708920199D13E3000DECCA /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F8708921199D13E3000DECCA /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		F8708924199D13E3000DECCA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		F8708925199D13E3000DECCA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		F8708927199D13E3000DECCA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DEPLOYMENT_LOCATION = YES;
+				DSTROOT = "$(HOME)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "SLSpeakItPlugin/SLSpeakItPlugin-Prefix.pch";
+				INFOPLIST_FILE = "SLSpeakItPlugin/SLSpeakItPlugin-Info.plist";
+				INSTALL_PATH = "/Library/Application Support/Developer/Shared/Xcode/Plug-ins";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = xcplugin;
+			};
+			name = Debug;
+		};
+		F8708928199D13E3000DECCA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DEPLOYMENT_LOCATION = YES;
+				DSTROOT = "$(HOME)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "SLSpeakItPlugin/SLSpeakItPlugin-Prefix.pch";
+				INFOPLIST_FILE = "SLSpeakItPlugin/SLSpeakItPlugin-Info.plist";
+				INSTALL_PATH = "/Library/Application Support/Developer/Shared/Xcode/Plug-ins";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = xcplugin;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F870890F199D13E3000DECCA /* Build configuration list for PBXProject "SLSpeakItPlugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F8708924199D13E3000DECCA /* Debug */,
+				F8708925199D13E3000DECCA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F8708926199D13E3000DECCA /* Build configuration list for PBXNativeTarget "SLSpeakItPlugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F8708927199D13E3000DECCA /* Debug */,
+				F8708928199D13E3000DECCA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F870890C199D13E3000DECCA /* Project object */;
+}
