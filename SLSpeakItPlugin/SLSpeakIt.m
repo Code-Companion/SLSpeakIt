@@ -76,21 +76,23 @@ static SLSpeakIt *speaker = nil;
     if ([self.rawInputString rangeOfString:@"Create an integer variable. Call it "].location != NSNotFound) {
         NSLog(@"Found match of lineStart");
         self.lineStart = @"Create an integer variable";
-        if ([self.rawInputString rangeOfString:@". Equal to "].location == NSNotFound) {
-            NSLog(@"Variable not detected");
-        } else {
-            [self setVariableNameAndValue];
-        }
+        [self setVariableNameAndValue];
+//        if ([self.rawInputString rangeOfString:@". Equal to "].location == NSNotFound) {
+//            NSLog(@"Variable not detected");
+//        } else {
+//            [self setVariableNameAndValue];
+//        }
     
     // second case - a float variable
     } else if ([self.rawInputString rangeOfString:@"Create a float variable. Call it "].location != NSNotFound) {
         NSLog(@"Found match of lineStart");
         self.lineStart = @"Create a float variable";
-        if ([self.rawInputString rangeOfString:@". Equal to "].location == NSNotFound) {
-            NSLog(@"Variable not detected");
-        } else {
-            [self setVariableNameAndValue];
-        }
+        [self setVariableNameAndValue];
+//        if ([self.rawInputString rangeOfString:@". Equal to "].location == NSNotFound) {
+//            NSLog(@"Variable not detected");
+//        } else {
+//            [self setVariableNameAndValue];
+//        }
     
     // default case
     } else {
@@ -101,32 +103,36 @@ static SLSpeakIt *speaker = nil;
 
 - (void)setVariableNameAndValue
 {
-    // Find and set the variable name
-    NSRange varStartRange = [self.rawInputString rangeOfString:@"Call it " options:NSBackwardsSearch];
-    NSRange varEndRange = [self.rawInputString rangeOfString:@". Equal to " options:NSBackwardsSearch];
-    NSUInteger varLength = (varEndRange.location) - (varStartRange.location+8);
-    NSString *varName = [self.rawInputString substringWithRange:NSMakeRange(varStartRange.location+8, varLength)];
-    
-    // If the variable has a value, find and set it, then call a method to replace
-    // on-screen text with code
-    if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
-        NSLog(@"Variable value not detected");
+    if ([self.rawInputString rangeOfString:@". Equal to "].location == NSNotFound) {
+        NSLog(@"Variable not detected");
     } else {
-        NSRange valStartRange = [self.rawInputString rangeOfString:@"Equal to " options:NSBackwardsSearch];
-        NSRange valEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
-        NSUInteger valLength = (valEndRange.location) - (valStartRange.location+9);
-        NSString *value = [self.rawInputString substringWithRange:NSMakeRange(valStartRange.location+9, valLength)];
-        if ([self.lineStart isEqualToString:@"Create an integer variable"]) {
-            int variableValue = [value intValue];
-            self.translatedCodeString = [NSString stringWithFormat:@"int %@ = %d;\n", varName, variableValue];
-            [self replaceLineWithTranslatedCodeString];
-        } else if ([self.lineStart isEqualToString:@"Create a float variable"]) {
-            float variableValue = [value floatValue];
-            self.translatedCodeString = [NSString stringWithFormat:@"float %@ = %f;\n", varName, variableValue];
-            [self replaceLineWithTranslatedCodeString];
+        // Find and set the variable name
+        NSRange varStartRange = [self.rawInputString rangeOfString:@"Call it " options:NSBackwardsSearch];
+        NSRange varEndRange = [self.rawInputString rangeOfString:@". Equal to " options:NSBackwardsSearch];
+        NSUInteger varLength = (varEndRange.location) - (varStartRange.location+8);
+        NSString *varName = [self.rawInputString substringWithRange:NSMakeRange(varStartRange.location+8, varLength)];
+        
+        // If the variable has a value, find and set it, then call a method to replace
+        // on-screen text with code
+        if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
+            NSLog(@"Variable value not detected");
         } else {
-            value = @"Placeholder";
-            varName = @"Placeholder";
+            NSRange valStartRange = [self.rawInputString rangeOfString:@"Equal to " options:NSBackwardsSearch];
+            NSRange valEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
+            NSUInteger valLength = (valEndRange.location) - (valStartRange.location+9);
+            NSString *value = [self.rawInputString substringWithRange:NSMakeRange(valStartRange.location+9, valLength)];
+            if ([self.lineStart isEqualToString:@"Create an integer variable"]) {
+                int variableValue = [value intValue];
+                self.translatedCodeString = [NSString stringWithFormat:@"int %@ = %d;\n", varName, variableValue];
+                [self replaceLineWithTranslatedCodeString];
+            } else if ([self.lineStart isEqualToString:@"Create a float variable"]) {
+                float variableValue = [value floatValue];
+                self.translatedCodeString = [NSString stringWithFormat:@"float %@ = %f;\n", varName, variableValue];
+                [self replaceLineWithTranslatedCodeString];
+            } else {
+                value = @"Placeholder";
+                varName = @"Placeholder";
+            }
         }
     }
 }
