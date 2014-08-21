@@ -15,6 +15,8 @@
 @property (strong, nonatomic) NSString *rawInputString;
 @property (strong, nonatomic) NSString *translatedCodeString;
 @property (strong, nonatomic) NSTextView *textView;
+@property (strong, nonatomic) NSString *lineStart;
+@property (strong, nonatomic) NSMutableArray *translatedCodeArray;
 
 - (void)tryReplacingStringWithCode;
 
