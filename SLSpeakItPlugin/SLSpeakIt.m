@@ -77,22 +77,12 @@ static SLSpeakIt *speaker = nil;
         NSLog(@"Found match of lineStart");
         self.lineStart = @"Create an integer variable";
         [self setVariableNameAndValue];
-//        if ([self.rawInputString rangeOfString:@". Equal to "].location == NSNotFound) {
-//            NSLog(@"Variable not detected");
-//        } else {
-//            [self setVariableNameAndValue];
-//        }
     
     // second case - a float variable
     } else if ([self.rawInputString rangeOfString:@"Create a float variable. Call it "].location != NSNotFound) {
         NSLog(@"Found match of lineStart");
         self.lineStart = @"Create a float variable";
         [self setVariableNameAndValue];
-//        if ([self.rawInputString rangeOfString:@". Equal to "].location == NSNotFound) {
-//            NSLog(@"Variable not detected");
-//        } else {
-//            [self setVariableNameAndValue];
-//        }
     
     // default case
     } else {
@@ -139,12 +129,18 @@ static SLSpeakIt *speaker = nil;
 
 - (void)replaceLineWithTranslatedCodeString
 {
-    // Replace the text on-screen with valid code
+    // First we get the user's original input as a range in textStorage, so we can replace it with code.
     NSRange lineRangeStart = [self.rawInputString rangeOfString:self.lineStart options:NSBackwardsSearch];
     NSRange lineRangeEnd = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
     NSUInteger lineRangeLength = (lineRangeEnd.location+7) - (lineRangeStart.location);
     NSRange replacementRange = NSMakeRange(lineRangeStart.location, lineRangeLength);
-    self.rawInputString = [self.rawInputString stringByReplacingCharactersInRange:replacementRange withString:self.translatedCodeString];
+    
+    // We store the user's original input in an array in case we need it.
+    self.previousInput = [self.rawInputString substringWithRange:replacementRange];
+    [self.previousInputArray addObject:self.previousInput];
+    
+    // Then we replace the text on-screen with valid code and add the code to an array
+    // of commands issued so far.
     [self.textView insertText:self.translatedCodeString replacementRange:replacementRange];
     [self.translatedCodeArray addObject:self.translatedCodeString];
 }
