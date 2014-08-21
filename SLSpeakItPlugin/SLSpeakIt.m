@@ -84,11 +84,22 @@ static SLSpeakIt *speaker = nil;
         self.lineStart = @"Create a float variable";
         [self setVariableNameAndValue];
     
+    // third case - a double variable
+    } else if ([self.rawInputString rangeOfString:@"Create a double variable. Call it "].location != NSNotFound) {
+        NSLog(@"Found match of lineStart");
+        self.lineStart = @"Create a double variable";
+        [self setVariableNameAndValue];
+        
+    // fourth case - a string variable
+    } else if ([self.rawInputString rangeOfString:@"Create a string variable. Call it "].location != NSNotFound) {
+        NSLog(@"Found match of lineStart");
+        self.lineStart = @"Create a string variable";
+        [self setVariableNameAndValue];
+        
     // default case
     } else {
         NSLog(@"No match of lineStart");
     }
-
 }
 
 - (void)setVariableNameAndValue
@@ -118,6 +129,13 @@ static SLSpeakIt *speaker = nil;
             } else if ([self.lineStart isEqualToString:@"Create a float variable"]) {
                 float variableValue = [value floatValue];
                 self.translatedCodeString = [NSString stringWithFormat:@"float %@ = %f;\n", varName, variableValue];
+                [self replaceLineWithTranslatedCodeString];
+            } else if ([self.lineStart isEqualToString:@"Create a double variable"]) {
+                double variableValue = [value doubleValue];
+                self.translatedCodeString = [NSString stringWithFormat:@"double %@ = %f;\n", varName, variableValue];
+                [self replaceLineWithTranslatedCodeString];
+            } else if ([self.lineStart isEqualToString:@"Create a string variable"]) {
+                self.translatedCodeString = [NSString stringWithFormat:@"NSString *%@ = @\"%@\";\n", varName, value];
                 [self replaceLineWithTranslatedCodeString];
             } else {
                 value = @"Placeholder";
