@@ -70,59 +70,87 @@ static SLSpeakIt *speaker = nil;
 
 - (void)tryReplacingStringWithCode
 {
-    // case - an integer variable
+    // case - create an integer variable
     if ([self.rawInputString rangeOfString:@"Create an integer variable. Call it "].location != NSNotFound) {
         NSLog(@"Found match of lineStart");
         self.lineStart = @"Create an integer variable";
         [self setVariableNameAndValue];
     
-    // case - a float variable
+    // case - create a float variable
     } else if ([self.rawInputString rangeOfString:@"Create a float variable. Call it "].location != NSNotFound) {
         NSLog(@"Found match of lineStart");
         self.lineStart = @"Create a float variable";
         [self setVariableNameAndValue];
     
-    // case - a double variable
+    // case - create a double variable
     } else if ([self.rawInputString rangeOfString:@"Create a double variable. Call it "].location != NSNotFound) {
         NSLog(@"Found match of lineStart");
         self.lineStart = @"Create a double variable";
         [self setVariableNameAndValue];
         
-    // case - a string variable
+    // case - create a string variable
     } else if ([self.rawInputString rangeOfString:@"Create a string variable. Call it "].location != NSNotFound) {
         NSLog(@"Found match of lineStart");
         self.lineStart = @"Create a string variable";
         [self setVariableNameAndValue];
     
-    // case - an unsigned integer NSUInteger variable
+    // case - create an unsigned integer NSUInteger variable
     } else if ([self.rawInputString rangeOfString:@"Create an unsigned integer variable. Call it "].location != NSNotFound) {
         NSLog(@"Found match of lineStart");
         self.lineStart = @"Create an unsigned integer variable";
         [self setVariableNameAndValue];
     
-    // case - an array
+    // case - create an array
     } else if ([self.rawInputString rangeOfString:@"Create an array. Call it "].location != NSNotFound) {
         NSLog(@"Found match of lineStart");
         self.lineStart = @"Create an array";
         [self setArrayOrSetName];
         
-    // case - a mutable array
+    // case - create a mutable array
     } else if ([self.rawInputString rangeOfString:@"Create a mutable array. Call it "].location != NSNotFound) {
         NSLog(@"Found match of lineStart");
         self.lineStart = @"Create a mutable array";
         [self setArrayOrSetName];
         
-    // case - a set
+    // case - create a set
     } else if ([self.rawInputString rangeOfString:@"Create a set. Call it "].location != NSNotFound) {
         NSLog(@"Found match of lineStart");
         self.lineStart = @"Create a set";
         [self setArrayOrSetName];
     
-    // case - a mutable set
+    // case - create a mutable set
     } else if ([self.rawInputString rangeOfString:@"Create a mutable set. Call it "].location != NSNotFound) {
         NSLog(@"Found match of lineStart");
         self.lineStart = @"Create a mutable set";
         [self setArrayOrSetName];
+        
+    // case - add to array or set
+    } else if ([self.rawInputString rangeOfString:@"Put "].location != NSNotFound) {
+        NSLog(@"Found match of lineStart");
+        self.lineStart = @"Put ";
+        [self addToArrayOrSet];
+    
+    // Do some math operations for ints, floats, doubles, etc.
+    // Add an NSNumber type so can be added to array
+    // Remove from array or set
+    
+    // Random selection from array or set
+    
+    // NSLogging
+    
+    // Create an if statement. Condition: x < 5 etc.
+    
+    // Else if at close-bracket (if so, then get condition: etc.
+    // Else at close-bracket (if so, then end and replace with code
+    
+    // Create a while loop. Condition: etc.
+    
+    // Next line -> does a newline \n
+    
+    // Previous line
+    
+    // Add a method. Call it
+    // Return functionality
         
     // default case
     } else {
@@ -151,6 +179,7 @@ static SLSpeakIt *speaker = nil;
             NSRange valEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
             NSUInteger valLength = (valEndRange.location) - (valStartRange.location+9);
             NSString *value = [self.rawInputString substringWithRange:NSMakeRange(valStartRange.location+9, valLength)];
+            
             if ([self.lineStart isEqualToString:@"Create an integer variable"]) {
                 int variableValue = [value intValue];
                 self.translatedCodeString = [NSString stringWithFormat:@"int %@ = %d;\n\t", varName, variableValue];
@@ -180,27 +209,56 @@ static SLSpeakIt *speaker = nil;
 
 - (void)setArrayOrSetName
 {
-    if ([self.rawInputString rangeOfString:@". Next."].location == NSNotFound) {
-        NSLog(@"Array name not detected");
-    } else {
+    if ([self.rawInputString rangeOfString:@". Next."].location != NSNotFound) {
+        
         // Find and set the array or set name
-        NSRange varStartRange = [self.rawInputString rangeOfString:@"Call it " options:NSBackwardsSearch];
-        NSRange varEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
-        NSUInteger varLength = (varEndRange.location) - (varStartRange.location+8);
-        NSString *varName = [self.rawInputString substringWithRange:NSMakeRange(varStartRange.location+8, varLength)];
+        NSRange arrStartRange = [self.rawInputString rangeOfString:@"Call it " options:NSBackwardsSearch];
+        NSRange arrEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
+        NSUInteger arrLength = (arrEndRange.location) - (arrStartRange.location+8);
+        NSString *arrName = [self.rawInputString substringWithRange:NSMakeRange(arrStartRange.location+8, arrLength)];
         
         // Call a method to replace on-screen text with code
         if ([self.lineStart isEqualToString:@"Create an array"]) {
-            self.translatedCodeString = [NSString stringWithFormat:@"NSArray *%@ = [[NSArray alloc] init];\n\t", varName];
+            self.translatedCodeString = [NSString stringWithFormat:@"NSArray *%@ = [[NSArray alloc] init];\n\t", arrName];
             [self replaceLineWithTranslatedCodeString];
         } else if ([self.lineStart isEqualToString:@"Create a mutable array"]) {
-            self.translatedCodeString = [NSString stringWithFormat:@"NSMutableArray *%@ = [[NSMutableArray alloc] init];\n\t", varName];
+            self.translatedCodeString = [NSString stringWithFormat:@"NSMutableArray *%@ = [[NSMutableArray alloc] init];\n\t", arrName];
             [self replaceLineWithTranslatedCodeString];
         } else if ([self.lineStart isEqualToString:@"Create a set"]) {
-            self.translatedCodeString = [NSString stringWithFormat:@"NSSet *%@ = [[NSSet alloc] init];\n\t", varName];
+            self.translatedCodeString = [NSString stringWithFormat:@"NSSet *%@ = [[NSSet alloc] init];\n\t", arrName];
             [self replaceLineWithTranslatedCodeString];
         } else if ([self.lineStart isEqualToString:@"Create a mutable set"]) {
-            self.translatedCodeString = [NSString stringWithFormat:@"NSMutableSet *%@ = [[NSMutableSet alloc] init];\n\t", varName];
+            self.translatedCodeString = [NSString stringWithFormat:@"NSMutableSet *%@ = [[NSMutableSet alloc] init];\n\t", arrName];
+            [self replaceLineWithTranslatedCodeString];
+        }
+
+    } else {
+        NSLog(@"Array name not detected");
+    }
+}
+
+- (void)addToArrayOrSet
+{
+    // Get the variable name
+    if ([self.rawInputString rangeOfString:@" into collection "].location != NSNotFound) {
+        NSRange varStartRange = [self.rawInputString rangeOfString:@"Put " options:NSBackwardsSearch];
+        NSRange varEndRange = [self.rawInputString rangeOfString:@" into collection " options:NSBackwardsSearch];
+        NSUInteger varLength = (varEndRange.location) - (varStartRange.location+4);
+        NSString *varName = [self.rawInputString substringWithRange:NSMakeRange(varStartRange.location+4, varLength)];
+        // If varName is not found earlier in self.rawInputString, give an error
+        
+        // Find out which array to put it in
+        if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
+            NSLog(@"No array or set name detected");
+        } else {
+            NSRange arrStartRange = [self.rawInputString rangeOfString:@" into collection " options:NSBackwardsSearch];
+            NSRange arrEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
+            NSUInteger arrLength = (arrEndRange.location) - (arrStartRange.location+17);
+            NSString *arrName = [self.rawInputString substringWithRange:NSMakeRange(arrStartRange.location+17, arrLength)];
+            // if arrName is not found earlier in self.rawInputString, give an error
+            
+            // Call a method to replace on-screen text with code
+            self.translatedCodeString = [NSString stringWithFormat:@"[%@ addObject:%@];\n\t", arrName, varName];
             [self replaceLineWithTranslatedCodeString];
         }
     }
