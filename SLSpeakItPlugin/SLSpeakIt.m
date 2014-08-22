@@ -19,7 +19,7 @@ static SLSpeakIt *speaker = nil;
 
 + (SLSpeakIt *)speaker
 {
-    NSLog(@"This is our first Xcode plugin!");
+    NSLog(@"Launching SLSpeakIt...");
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         speaker = [[self alloc] init];
@@ -70,8 +70,6 @@ static SLSpeakIt *speaker = nil;
 
 - (void)tryReplacingStringWithCode
 {
-    NSLog(@"Replacing code...");
-    
     // first case - an integer variable
     if ([self.rawInputString rangeOfString:@"Create an integer variable. Call it "].location != NSNotFound) {
         NSLog(@"Found match of lineStart");
@@ -95,7 +93,13 @@ static SLSpeakIt *speaker = nil;
         NSLog(@"Found match of lineStart");
         self.lineStart = @"Create a string variable";
         [self setVariableNameAndValue];
-        
+    
+    // fifth case - an unsigned integer NSUInteger variable
+    } else if ([self.rawInputString rangeOfString:@"Create an unsigned integer variable. Call it "].location != NSNotFound) {
+        NSLog(@"Found match of lineStart");
+        self.lineStart = @"Create an unsigned integer variable";
+        [self setVariableNameAndValue];
+    
     // default case
     } else {
         NSLog(@"No match of lineStart");
@@ -124,18 +128,22 @@ static SLSpeakIt *speaker = nil;
             NSString *value = [self.rawInputString substringWithRange:NSMakeRange(valStartRange.location+9, valLength)];
             if ([self.lineStart isEqualToString:@"Create an integer variable"]) {
                 int variableValue = [value intValue];
-                self.translatedCodeString = [NSString stringWithFormat:@"int %@ = %d;\n", varName, variableValue];
+                self.translatedCodeString = [NSString stringWithFormat:@"int %@ = %d;\n\t", varName, variableValue];
                 [self replaceLineWithTranslatedCodeString];
             } else if ([self.lineStart isEqualToString:@"Create a float variable"]) {
                 float variableValue = [value floatValue];
-                self.translatedCodeString = [NSString stringWithFormat:@"float %@ = %f;\n", varName, variableValue];
+                self.translatedCodeString = [NSString stringWithFormat:@"float %@ = %f;\n\t", varName, variableValue];
                 [self replaceLineWithTranslatedCodeString];
             } else if ([self.lineStart isEqualToString:@"Create a double variable"]) {
                 double variableValue = [value doubleValue];
-                self.translatedCodeString = [NSString stringWithFormat:@"double %@ = %f;\n", varName, variableValue];
+                self.translatedCodeString = [NSString stringWithFormat:@"double %@ = %f;\n\t", varName, variableValue];
                 [self replaceLineWithTranslatedCodeString];
             } else if ([self.lineStart isEqualToString:@"Create a string variable"]) {
-                self.translatedCodeString = [NSString stringWithFormat:@"NSString *%@ = @\"%@\";\n", varName, value];
+                self.translatedCodeString = [NSString stringWithFormat:@"NSString *%@ = @\"%@\";\n\t", varName, value];
+                [self replaceLineWithTranslatedCodeString];
+            } else if ([self.lineStart isEqualToString:@"Create an unsigned integer variable"]) {
+                NSUInteger variableValue = [value intValue];
+                self.translatedCodeString = [NSString stringWithFormat:@"NSUInteger %@ = %lu;\n\t", varName, (unsigned long)variableValue];
                 [self replaceLineWithTranslatedCodeString];
             } else {
                 value = @"Placeholder";
@@ -171,6 +179,7 @@ static SLSpeakIt *speaker = nil;
 - (void)didClickStopSpeakIt:(id)sender
 {
     self.rawInputString = nil;
+    self.previousInput = nil;
     self.translatedCodeString = nil;
     self.lineStart = nil;
     [self.onOffSwitch setTitle:@"Start SpeakIt"];
