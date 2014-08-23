@@ -129,7 +129,19 @@ static SLSpeakIt *speaker = nil;
         NSLog(@"Found match of lineStart");
         self.lineStart = @"Put ";
         [self addToArrayOrSet];
-    
+        
+    // case - remove from array or set
+    } else if ([self.rawInputString rangeOfString:@"Remove "].location != NSNotFound) {
+        NSLog(@"Found match of lineStart");
+        self.lineStart = @"Remove ";
+        [self removeFromArrayOrSet];
+        
+    // case - log to console
+    } else if ([self.rawInputString rangeOfString:@"Print "].location != NSNotFound) {
+        NSLog(@"Found match of lineStart");
+        self.lineStart = @"Print ";
+        [self logToConsole];
+        
     // Do some math operations for ints, floats, doubles, etc.
     // Add an NSNumber type so can be added to array
     // Remove from array or set
@@ -239,7 +251,7 @@ static SLSpeakIt *speaker = nil;
 
 - (void)addToArrayOrSet
 {
-    // Get the variable name
+    // Get the object name to add
     if ([self.rawInputString rangeOfString:@" into collection "].location != NSNotFound) {
         NSRange varStartRange = [self.rawInputString rangeOfString:@"Put " options:NSBackwardsSearch];
         NSRange varEndRange = [self.rawInputString rangeOfString:@" into collection " options:NSBackwardsSearch];
@@ -247,7 +259,7 @@ static SLSpeakIt *speaker = nil;
         NSString *varName = [self.rawInputString substringWithRange:NSMakeRange(varStartRange.location+4, varLength)];
         // If varName is not found earlier in self.rawInputString, give an error
         
-        // Find out which array to put it in
+        // Find out which array or set to put it in
         if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
             NSLog(@"No array or set name detected");
         } else {
@@ -261,6 +273,49 @@ static SLSpeakIt *speaker = nil;
             self.translatedCodeString = [NSString stringWithFormat:@"[%@ addObject:%@];\n\t", arrName, varName];
             [self replaceLineWithTranslatedCodeString];
         }
+    }
+}
+
+- (void)removeFromArrayOrSet
+{
+    // Get the object name to remove
+    if ([self.rawInputString rangeOfString:@" from collection "].location != NSNotFound) {
+        NSRange varStartRange = [self.rawInputString rangeOfString:@"Remove " options:NSBackwardsSearch];
+        NSRange varEndRange = [self.rawInputString rangeOfString:@" from collection " options:NSBackwardsSearch];
+        NSUInteger varLength = (varEndRange.location) - (varStartRange.location+7);
+        NSString *varName = [self.rawInputString substringWithRange:NSMakeRange(varStartRange.location+7, varLength)];
+        // If varName is not found earlier in self.rawInputString, give an error
+
+        // Find out which array or set to remove it from
+        if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
+            NSLog(@"No array or set name detected");
+        } else {
+            NSRange arrStartRange = [self.rawInputString rangeOfString:@" from collection " options:NSBackwardsSearch];
+            NSRange arrEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
+            NSUInteger arrLength = (arrEndRange.location) - (arrStartRange.location+17);
+            NSString *arrName = [self.rawInputString substringWithRange:NSMakeRange(arrStartRange.location+17, arrLength)];
+            // if arrName is not found earlier in self.rawInputString, give an error
+            
+            // Call a method to replace on-screen text with code
+            self.translatedCodeString = [NSString stringWithFormat:@"[%@ removeObject:%@];\n\t", arrName, varName];
+            [self replaceLineWithTranslatedCodeString];
+        }
+    }
+}
+
+- (void)logToConsole
+{
+    if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
+        NSLog(@"String to print not detected");
+    } else {
+        // Get the string to print
+        NSRange printStartRange = [self.rawInputString rangeOfString:@"Print " options:NSBackwardsSearch];
+        NSRange printEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
+        NSUInteger printLength = (printEndRange.location) - (printStartRange.location+6);
+        NSString *printString = [self.rawInputString substringWithRange:NSMakeRange(printStartRange.location+6, printLength)];
+        
+        self.translatedCodeString = [NSString stringWithFormat:@"NSLog(@\"%@\");\n\t", printString];
+        [self replaceLineWithTranslatedCodeString];
     }
 }
 
