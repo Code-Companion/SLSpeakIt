@@ -49,6 +49,11 @@ static SLSpeakIt *speaker = nil;
 {
     [self.onOffSwitch setTitle:@"Stop SpeakIt"];
     [self.onOffSwitch setAction:@selector(didClickStopSpeakIt:)];
+    // Consider using NSUserDefaults for storing data between sessions
+    self.variablesArray = [[NSMutableArray alloc] init];
+    self.collectionsArray = [[NSMutableArray alloc] init];
+    self.previousInputArray = [[NSMutableArray alloc] init];
+    self.translatedCodeArray = [[NSMutableArray alloc] init];
     NSLog(@"Started SpeakIt");
     [[NSNotificationCenter defaultCenter] addObserver:self
                                             selector:@selector(didChangeText:)
@@ -143,12 +148,9 @@ static SLSpeakIt *speaker = nil;
         [self logToConsole];
         
     // Do some math operations for ints, floats, doubles, etc.
-    // Add an NSNumber type so can be added to array
-    // Remove from array or set
+    // Add an NSNumber variable type
     
     // Random selection from array or set
-    
-    // NSLogging
     
     // Create an if statement. Condition: x < 5 etc.
     
@@ -161,7 +163,7 @@ static SLSpeakIt *speaker = nil;
     
     // Previous line
     
-    // Add a method. Call it
+    // Add a (void/bool/int/id/NSArray/etc.) method. Call it
     // Return functionality
         
     // default case
@@ -191,6 +193,7 @@ static SLSpeakIt *speaker = nil;
             NSRange valEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
             NSUInteger valLength = (valEndRange.location) - (valStartRange.location+9);
             NSString *value = [self.rawInputString substringWithRange:NSMakeRange(valStartRange.location+9, valLength)];
+            [self.variablesArray addObject:varName];
             
             if ([self.lineStart isEqualToString:@"Create an integer variable"]) {
                 int variableValue = [value intValue];
@@ -228,6 +231,7 @@ static SLSpeakIt *speaker = nil;
         NSRange arrEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
         NSUInteger arrLength = (arrEndRange.location) - (arrStartRange.location+8);
         NSString *arrName = [self.rawInputString substringWithRange:NSMakeRange(arrStartRange.location+8, arrLength)];
+        [self.collectionsArray addObject:arrName];
         
         // Call a method to replace on-screen text with code
         if ([self.lineStart isEqualToString:@"Create an array"]) {
@@ -258,6 +262,7 @@ static SLSpeakIt *speaker = nil;
         NSUInteger varLength = (varEndRange.location) - (varStartRange.location+4);
         NSString *varName = [self.rawInputString substringWithRange:NSMakeRange(varStartRange.location+4, varLength)];
         // If varName is not found earlier in self.rawInputString, give an error
+        // check the self.variablesArray - change this next week
         
         // Find out which array or set to put it in
         if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
@@ -268,6 +273,7 @@ static SLSpeakIt *speaker = nil;
             NSUInteger arrLength = (arrEndRange.location) - (arrStartRange.location+17);
             NSString *arrName = [self.rawInputString substringWithRange:NSMakeRange(arrStartRange.location+17, arrLength)];
             // if arrName is not found earlier in self.rawInputString, give an error
+            // check the self.collectionsArray - change this next week
             
             // Call a method to replace on-screen text with code
             self.translatedCodeString = [NSString stringWithFormat:@"[%@ addObject:%@];\n\t", arrName, varName];
@@ -285,6 +291,7 @@ static SLSpeakIt *speaker = nil;
         NSUInteger varLength = (varEndRange.location) - (varStartRange.location+7);
         NSString *varName = [self.rawInputString substringWithRange:NSMakeRange(varStartRange.location+7, varLength)];
         // If varName is not found earlier in self.rawInputString, give an error
+        // check the self.variablesArray - change this next week
 
         // Find out which array or set to remove it from
         if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
@@ -295,6 +302,7 @@ static SLSpeakIt *speaker = nil;
             NSUInteger arrLength = (arrEndRange.location) - (arrStartRange.location+17);
             NSString *arrName = [self.rawInputString substringWithRange:NSMakeRange(arrStartRange.location+17, arrLength)];
             // if arrName is not found earlier in self.rawInputString, give an error
+            // check the self.collectionsArray - change this next week
             
             // Call a method to replace on-screen text with code
             self.translatedCodeString = [NSString stringWithFormat:@"[%@ removeObject:%@];\n\t", arrName, varName];
@@ -348,6 +356,7 @@ static SLSpeakIt *speaker = nil;
     self.previousInput = nil;
     self.translatedCodeString = nil;
     self.lineStart = nil;
+    // Consider storing array contents in NSUserDefaults here
     [self.onOffSwitch setTitle:@"Start SpeakIt"];
     [self.onOffSwitch setAction:@selector(didClickBeginSpeakIt:)];
     NSLog(@"Stopped SpeakIt");

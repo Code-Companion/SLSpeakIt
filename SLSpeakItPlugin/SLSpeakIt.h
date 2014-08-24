@@ -19,6 +19,8 @@
 @property (strong, nonatomic) NSMutableArray *translatedCodeArray;
 @property (strong, nonatomic) NSString *previousInput;
 @property (strong, nonatomic) NSMutableArray *previousInputArray;
+@property (strong, nonatomic) NSMutableArray *variablesArray;
+@property (strong, nonatomic) NSMutableArray *collectionsArray;
 
 - (void)tryReplacingStringWithCode;
 
