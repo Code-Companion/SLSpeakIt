@@ -146,6 +146,12 @@ static SLSpeakIt *speaker = nil;
         NSLog(@"Found match of lineStart");
         self.lineStart = @"Print ";
         [self logToConsole];
+    
+    // case - get random object from array or set
+    } else if ([self.rawInputString rangeOfString:@"Random item from "].location != NSNotFound) {
+        NSLog(@"Found match of lineStart");
+        self.lineStart = @"Random item from ";
+        [self getRandomFromArrayOrSet];
         
     // Do some math operations for ints, floats, doubles, etc.
     // Add an NSNumber variable type
@@ -279,6 +285,24 @@ static SLSpeakIt *speaker = nil;
             self.translatedCodeString = [NSString stringWithFormat:@"[%@ addObject:%@];\n\t", arrName, varName];
             [self replaceLineWithTranslatedCodeString];
         }
+    }
+}
+
+- (void)getRandomFromArrayOrSet
+{
+    if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
+        NSLog(@"No array or set name detected");
+    } else {
+        NSRange arrStartRange = [self.rawInputString rangeOfString:self.lineStart options:NSBackwardsSearch];
+        NSRange arrEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
+        NSUInteger arrLength = (arrEndRange.location) - (arrStartRange.location+17);
+        NSString *arrName = [self.rawInputString substringWithRange:NSMakeRange(arrStartRange.location+17, arrLength)];
+        NSLog(@"arrName is %@", arrName);
+        
+        // Call a method to replace on-screen text with code
+        self.translatedCodeString = [NSString stringWithFormat:@"NSInteger index = arc4random() %% [%@ count];\n\tid randomObject = [%@ objectAtIndex:index];\n\t", arrName, arrName];
+        self.translatedCodeString = [self.translatedCodeString stringByAppendingString:@"NSLog(@\"Random object selected is %@.\", randomObject);\n\t"];
+        [self replaceLineWithTranslatedCodeString];
     }
 }
 
