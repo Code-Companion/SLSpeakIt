@@ -140,6 +140,12 @@ static SLSpeakIt *speaker = nil;
         NSLog(@"Found match of lineStart");
         self.lineStart = @"Remove ";
         [self removeFromArrayOrSet];
+
+    // case - get random object from array or set
+    } else if ([self.rawInputString rangeOfString:@"Random item from collection "].location != NSNotFound) {
+        NSLog(@"Found match of lineStart");
+        self.lineStart = @"Random item from collection ";
+        [self getRandomFromArrayOrSet];
         
     // case - log to console
     } else if ([self.rawInputString rangeOfString:@"Print "].location != NSNotFound) {
@@ -147,16 +153,18 @@ static SLSpeakIt *speaker = nil;
         self.lineStart = @"Print ";
         [self logToConsole];
     
-    // case - get random object from array or set
-    } else if ([self.rawInputString rangeOfString:@"Random item from "].location != NSNotFound) {
-        NSLog(@"Found match of lineStart");
-        self.lineStart = @"Random item from ";
-        [self getRandomFromArrayOrSet];
+    // case - delete warning
+    } else if ([self.rawInputString rangeOfString:@"Delete warning"].location != NSNotFound) {
+        self.lineStart = @"Delete warning";
+        [self deleteWarning];
         
+//    // case - create an if statement
+//    } else if ([self.rawInputString rangeOfString:@"Create an if statement"].location != NSNotFound) {
+//        self.lineStart = @"Create an if statement";
+//        [self createIfStatement];
+//        
     // Do some math operations for ints, floats, doubles, etc.
     // Add an NSNumber variable type
-    
-    // Random selection from array or set
     
     // Create an if statement. Condition: x < 5 etc.
     
@@ -193,7 +201,7 @@ static SLSpeakIt *speaker = nil;
         // on-screen text with code
         if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
             NSLog(@"Variable value not detected");
-            // Set it as an empty value in code here
+            varName = nil;
         } else {
             NSRange valStartRange = [self.rawInputString rangeOfString:@"Equal to " options:NSBackwardsSearch];
             NSRange valEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
@@ -263,12 +271,10 @@ static SLSpeakIt *speaker = nil;
 {
     // Get the object name to add
     if ([self.rawInputString rangeOfString:@" into collection "].location != NSNotFound) {
-        NSRange varStartRange = [self.rawInputString rangeOfString:@"Put " options:NSBackwardsSearch];
+        NSRange varStartRange = [self.rawInputString rangeOfString:self.lineStart options:NSBackwardsSearch];
         NSRange varEndRange = [self.rawInputString rangeOfString:@" into collection " options:NSBackwardsSearch];
         NSUInteger varLength = (varEndRange.location) - (varStartRange.location+4);
         NSString *varName = [self.rawInputString substringWithRange:NSMakeRange(varStartRange.location+4, varLength)];
-        // If varName is not found earlier in self.rawInputString, give an error
-        // check the self.variablesArray - change this next week
         
         // Find out which array or set to put it in
         if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
@@ -278,12 +284,15 @@ static SLSpeakIt *speaker = nil;
             NSRange arrEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
             NSUInteger arrLength = (arrEndRange.location) - (arrStartRange.location+17);
             NSString *arrName = [self.rawInputString substringWithRange:NSMakeRange(arrStartRange.location+17, arrLength)];
-            // if arrName is not found earlier in self.rawInputString, give an error
-            // check the self.collectionsArray - change this next week
             
             // Call a method to replace on-screen text with code
-            self.translatedCodeString = [NSString stringWithFormat:@"[%@ addObject:%@];\n\t", arrName, varName];
-            [self replaceLineWithTranslatedCodeString];
+            if ([self.collectionsArray containsObject:arrName] && [self.variablesArray containsObject:varName]) {
+                self.translatedCodeString = [NSString stringWithFormat:@"[%@ addObject:%@];\n\t", arrName, varName];
+                [self replaceLineWithTranslatedCodeString];
+            } else {
+                self.translatedCodeString = [NSString stringWithFormat:@"// Warning: The collection %@ or the variable %@ does not exist yet.\n\t", arrName, varName];
+                [self replaceLineWithTranslatedCodeString];
+            }
         }
     }
 }
@@ -295,11 +304,13 @@ static SLSpeakIt *speaker = nil;
     } else {
         NSRange arrStartRange = [self.rawInputString rangeOfString:self.lineStart options:NSBackwardsSearch];
         NSRange arrEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
-        NSUInteger arrLength = (arrEndRange.location) - (arrStartRange.location+17);
-        NSString *arrName = [self.rawInputString substringWithRange:NSMakeRange(arrStartRange.location+17, arrLength)];
+        NSUInteger arrLength = (arrEndRange.location) - (arrStartRange.location+28);
+        NSString *arrName = [self.rawInputString substringWithRange:NSMakeRange(arrStartRange.location+28, arrLength)];
         NSLog(@"arrName is %@", arrName);
         
         // Call a method to replace on-screen text with code
+        // Need to do a check to see if index and randomObject commands already exist in translatedCodeArray
+        // if so, refer by name to the variables and do not re-create them
         self.translatedCodeString = [NSString stringWithFormat:@"NSInteger index = arc4random() %% [%@ count];\n\tid randomObject = [%@ objectAtIndex:index];\n\t", arrName, arrName];
         self.translatedCodeString = [self.translatedCodeString stringByAppendingString:@"NSLog(@\"Random object selected is %@.\", randomObject);\n\t"];
         [self replaceLineWithTranslatedCodeString];
@@ -310,12 +321,10 @@ static SLSpeakIt *speaker = nil;
 {
     // Get the object name to remove
     if ([self.rawInputString rangeOfString:@" from collection "].location != NSNotFound) {
-        NSRange varStartRange = [self.rawInputString rangeOfString:@"Remove " options:NSBackwardsSearch];
+        NSRange varStartRange = [self.rawInputString rangeOfString:self.lineStart options:NSBackwardsSearch];
         NSRange varEndRange = [self.rawInputString rangeOfString:@" from collection " options:NSBackwardsSearch];
         NSUInteger varLength = (varEndRange.location) - (varStartRange.location+7);
         NSString *varName = [self.rawInputString substringWithRange:NSMakeRange(varStartRange.location+7, varLength)];
-        // If varName is not found earlier in self.rawInputString, give an error
-        // check the self.variablesArray - change this next week
 
         // Find out which array or set to remove it from
         if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
@@ -325,12 +334,15 @@ static SLSpeakIt *speaker = nil;
             NSRange arrEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
             NSUInteger arrLength = (arrEndRange.location) - (arrStartRange.location+17);
             NSString *arrName = [self.rawInputString substringWithRange:NSMakeRange(arrStartRange.location+17, arrLength)];
-            // if arrName is not found earlier in self.rawInputString, give an error
-            // check the self.collectionsArray - change this next week
             
             // Call a method to replace on-screen text with code
-            self.translatedCodeString = [NSString stringWithFormat:@"[%@ removeObject:%@];\n\t", arrName, varName];
-            [self replaceLineWithTranslatedCodeString];
+            if ([self.collectionsArray containsObject:arrName] && [self.variablesArray containsObject:varName]) {
+                self.translatedCodeString = [NSString stringWithFormat:@"[%@ removeObject:%@];\n\t", arrName, varName];
+                [self replaceLineWithTranslatedCodeString];
+            } else {
+                self.translatedCodeString = [NSString stringWithFormat:@"// Warning: The collection %@ or the variable %@ does not exist yet.\n\t", arrName, varName];
+                [self replaceLineWithTranslatedCodeString];
+            }
         }
     }
 }
@@ -341,7 +353,7 @@ static SLSpeakIt *speaker = nil;
         NSLog(@"String to print not detected");
     } else {
         // Get the string to print
-        NSRange printStartRange = [self.rawInputString rangeOfString:@"Print " options:NSBackwardsSearch];
+        NSRange printStartRange = [self.rawInputString rangeOfString:self.lineStart options:NSBackwardsSearch];
         NSRange printEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
         NSUInteger printLength = (printEndRange.location) - (printStartRange.location+6);
         NSString *printString = [self.rawInputString substringWithRange:NSMakeRange(printStartRange.location+6, printLength)];
@@ -350,6 +362,31 @@ static SLSpeakIt *speaker = nil;
         [self replaceLineWithTranslatedCodeString];
     }
 }
+
+- (void)deleteWarning
+{
+    if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
+        NSLog(@"Warning deletion not confirmed");
+    } else {
+        NSRange warningStartRange = [self.rawInputString rangeOfString:@"// Warning: " options:NSBackwardsSearch];
+        NSRange warningEndRange = [self.rawInputString rangeOfString:@" warning. Next.\n"];
+        NSUInteger warningLength = (warningEndRange.location+15) - (warningStartRange.location);
+        NSRange replacementRange = NSMakeRange(warningStartRange.location, warningLength);
+        self.translatedCodeString = @"";
+        [self.textView insertText:self.translatedCodeString replacementRange:replacementRange];
+    }
+}
+
+//- (void)createIfStatement
+//{
+//    // Get the condition
+//    if ([self.rawInputString rangeOfString:@"Condition "].location != NSNotFound) {
+//        NSRange conditionStartRange = [self.rawInputString rangeOfString:@"Condition " options:NSBackwardsSearch];
+//        NSRange conditionEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
+//        NSUInteger conditionLength = (conditionEndRange.location) - (conditionStartRange.location+10);
+//        NSString *condition
+//    }
+//}
 
 - (void)replaceLineWithTranslatedCodeString
 {
@@ -366,7 +403,9 @@ static SLSpeakIt *speaker = nil;
     // Then we replace the text on-screen with valid code and add the code to an array
     // of commands issued so far.
     [self.textView insertText:self.translatedCodeString replacementRange:replacementRange];
-    [self.translatedCodeArray addObject:self.translatedCodeString];
+    if ([self.translatedCodeString rangeOfString:@"// Warning: "].location == NSNotFound) {
+        [self.translatedCodeArray addObject:self.translatedCodeString];
+    }
 }
 
 // Make an undo function to delete the latest translatedCodeString from the screen
@@ -378,6 +417,7 @@ static SLSpeakIt *speaker = nil;
 {
     self.rawInputString = nil;
     self.previousInput = nil;
+    self.previousInputArray = nil;
     self.translatedCodeString = nil;
     self.lineStart = nil;
     // Consider storing array contents in NSUserDefaults here
