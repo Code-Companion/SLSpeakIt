@@ -158,6 +158,16 @@ static SLSpeakIt *speaker = nil;
         self.lineStart = @"Delete warning";
         [self deleteWarning];
         
+    // case - create a fast enumeration loop
+    } else if ([self.rawInputString rangeOfString:@"Create a fast enumeration loop. For "].location != NSNotFound) {
+        self.lineStart = @"Create a fast enumeration loop. For ";
+        [self createFastEnumerationLoop];
+    
+//    // case - create a loop
+//    } else if ([self.rawInputString rangeOfString:@"Create a loop"].location != NSNotFound) {
+//        self.lineStart = @"Create a loop";
+//        [self setLoopConditions];
+        
 //    // case - create an if statement
 //    } else if ([self.rawInputString rangeOfString:@"Create an if statement"].location != NSNotFound) {
 //        self.lineStart = @"Create an if statement";
@@ -236,6 +246,11 @@ static SLSpeakIt *speaker = nil;
     }
 }
 
+- (void)resetVariableValue
+{
+    
+}
+
 - (void)setArrayOrSetName
 {
     if ([self.rawInputString rangeOfString:@". Next."].location != NSNotFound) {
@@ -309,11 +324,14 @@ static SLSpeakIt *speaker = nil;
         NSLog(@"arrName is %@", arrName);
         
         // Call a method to replace on-screen text with code
-        // Need to do a check to see if index and randomObject commands already exist in translatedCodeArray
-        // if so, refer by name to the variables and do not re-create them
-        self.translatedCodeString = [NSString stringWithFormat:@"NSInteger index = arc4random() %% [%@ count];\n\tid randomObject = [%@ objectAtIndex:index];\n\t", arrName, arrName];
-        self.translatedCodeString = [self.translatedCodeString stringByAppendingString:@"NSLog(@\"Random object selected is %@.\", randomObject);\n\t"];
-        [self replaceLineWithTranslatedCodeString];
+        if ([self.collectionsArray containsObject:arrName]) {
+            self.translatedCodeString = [NSString stringWithFormat:@"NSInteger index = arc4random() %% [%@ count];\n\tid randomObject = [%@ objectAtIndex:index];\n\t", arrName, arrName];
+            self.translatedCodeString = [self.translatedCodeString stringByAppendingString:@"NSLog(@\"Random object selected is %@.\", randomObject);\n\t"];
+            [self replaceLineWithTranslatedCodeString];
+        } else {
+            self.translatedCodeString = [NSString stringWithFormat:@"// Warning: The collection %@ does not exist yet.\n\t", arrName];
+            [self replaceLineWithTranslatedCodeString];
+        }
     }
 }
 
@@ -376,6 +394,104 @@ static SLSpeakIt *speaker = nil;
         [self.textView insertText:self.translatedCodeString replacementRange:replacementRange];
     }
 }
+
+- (void)createFastEnumerationLoop
+{
+    if ([self.rawInputString rangeOfString:@" in collection "].location != NSNotFound) {
+        // Get the variable name
+        NSRange varStartRange = [self.rawInputString rangeOfString:self.lineStart options:NSBackwardsSearch];
+        NSRange varEndRange = [self.rawInputString rangeOfString:@" in collection " options:NSBackwardsSearch];
+        NSUInteger varLength = (varEndRange.location) - (varStartRange.location+self.lineStart.length);
+        NSString *varName = [self.rawInputString substringWithRange:NSMakeRange(varStartRange.location+self.lineStart.length, varLength)];
+        
+        if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
+            // Get the array name
+            NSRange arrStartRange = [self.rawInputString rangeOfString:@" in collection " options:NSBackwardsSearch];
+            NSRange arrEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
+            NSUInteger arrLength = (arrEndRange.location) - (arrStartRange.location+arrStartRange.length);
+            NSString *arrName = [self.rawInputString substringWithRange:NSMakeRange(arrStartRange.location+arrStartRange.length, arrLength)];
+            
+            // Check for array existence and then replace on-screen text with code
+            if ([self.collectionsArray containsObject:arrName]) {
+                [self.variablesArray addObject:varName];
+                // Fix cursor position here
+                self.translatedCodeString = [NSString stringWithFormat:@"for (id %@ in %@) {\n\t\t}", varName, arrName];
+                [self replaceLineWithTranslatedCodeString];
+            } else {
+                self.translatedCodeString = [NSString stringWithFormat:@"// Warning: The variable %@ or the collection %@ does not exist yet.\n\t", varName, arrName];
+                [self replaceLineWithTranslatedCodeString];
+            }
+        }
+    }
+}
+
+//- (void)setLoopConditions
+//{
+//    if ([self.rawInputString rangeOfString:@". Condition "].location != NSNotFound) {
+//        // Get the variable to operate on
+//        NSRange varStartRange = [self.rawInputString rangeOfString:@". Condition " options:NSBackwardsSearch];
+//        NSRange varEndRange;
+//        if ([self.rawInputString rangeOfString:@" equal to "].location != NSNotFound) {
+//            varEndRange = [self.rawInputString rangeOfString:@" equal to " options:NSBackwardsSearch];
+//        } else if ([self.rawInputString rangeOfString:@" less than "].location != NSNotFound) {
+//            varEndRange = [self.rawInputString rangeOfString:@" less than " options:NSBackwardsSearch];
+//        } else if ([self.rawInputString rangeOfString:@" greater than "].location != NSNotFound) {
+//            varEndRange = [self.rawInputString rangeOfString:@" greater than " options:NSBackwardsSearch];
+//        } else if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
+//            varEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
+//        } else {
+//            NSLog(@"Did not detect variable name");
+//        }
+//        NSUInteger varLength = (varEndRange.location) - (varStartRange.location+12);
+//        NSString *varName = [self.rawInputString substringWithRange:NSMakeRange(varStartRange.location+12, varLength)];
+//        NSLog(@"varName is %@", varName);
+//        
+//        // Get the value that the variable is compared to
+//        if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
+//            NSRange valStartRange;
+//            NSRange valEndRange;
+//            NSUInteger valLength;
+//            NSString *value = nil;
+//            // add "not equal to" here as another if case
+//            if ([self.rawInputString rangeOfString:@" equal to "].location != NSNotFound) {
+//                valStartRange = [self.rawInputString rangeOfString:@" equal to " options:NSBackwardsSearch];
+//                valEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
+//                valLength = (valEndRange.location) - (valStartRange.location+10);
+//                value = [self.rawInputString substringWithRange:NSMakeRange(valStartRange.location+10, valLength)];
+//                if ([self.rawInputString rangeOfString:@"integer"].location != NSNotFound) {
+//                    int variableValue = [value intValue];
+//                    self.translatedCodeString = [NSString stringWithFormat:@"while (%@ == %d) {\n", varName, variableValue];
+//                    [self replaceLineWithTranslatedCodeString];
+//                } else if ([self.rawInputString rangeOfString:@"float"].location != NSNotFound) {
+//                    float variableValue = [value floatValue];
+//                    self.translatedCodeString = [NSString stringWithFormat:@"while (%@ == %f) {\n", varName, variableValue];
+//                    [self replaceLineWithTranslatedCodeString];
+//                } else if ([self.rawInputString rangeOfString:@"double"].location != NSNotFound) {
+//                    double variableValue = [value doubleValue];
+//                    self.translatedCodeString = [NSString stringWithFormat:@"while (%@ == %f) {\n", varName, variableValue];
+//                    [self replaceLineWithTranslatedCodeString];
+//                } else if (([self.rawInputString rangeOfString:@"YES"].location != NSNotFound) || ([self.rawInputString rangeOfString:@"NO"].location != NSNotFound)) {
+//                    self.translatedCodeString = [NSString stringWithFormat:@"while (%@ == %@) {\n", varName, value];
+//                    [self replaceLineWithTranslatedCodeString];
+//                } else {
+//                    NSLog(@"Could not replace text with code");
+//                }
+//            } else if ([self.rawInputString rangeOfString:@" less than "].location != NSNotFound) {
+//                valStartRange = [self.rawInputString rangeOfString:@" less than " options:NSBackwardsSearch];
+//                valEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
+//                valLength = (valEndRange.location) - (valStartRange.location+11);
+//                value = [self.rawInputString substringWithRange:NSMakeRange(valStartRange.location+11, valLength)];
+//            } else if ([self.rawInputString rangeOfString:@" greater than "].location != NSNotFound) {
+//                valStartRange = [self.rawInputString rangeOfString:@" greater than " options:NSBackwardsSearch];
+//                valEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
+//                valLength = (valEndRange.location) - (valStartRange.location+14);
+//                value = [self.rawInputString substringWithRange:NSMakeRange(valStartRange.location+14, valLength)];
+//            } else {
+//                NSLog(@"Could not set valStartRange");
+//            }
+//        }
+//    }
+//}
 
 //- (void)createIfStatement
 //{
