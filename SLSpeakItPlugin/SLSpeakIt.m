@@ -395,6 +395,22 @@ static SLSpeakIt *speaker = nil;
     }
 }
 
+- (void)deletePlaceholder
+{
+    // This is extremely hacky and will be replaced at some point. But it works for now.
+    if ([self.rawInputString rangeOfString:@"//placeholder"].location != NSNotFound) {
+        NSRange placeholderStartRange = [self.rawInputString rangeOfString:@"//place" options:NSBackwardsSearch];
+        NSRange placeholderEndRange = [self.rawInputString rangeOfString:@"holder" options:NSBackwardsSearch];
+        NSUInteger placeholderLength = (placeholderEndRange.location+6) - (placeholderStartRange.location);
+        NSRange replacementRange = NSMakeRange(placeholderStartRange.location, placeholderLength);
+        self.translatedCodeString = @"";
+        [self.textView setSelectedRange:replacementRange];
+        [self.textView insertText:self.translatedCodeString replacementRange:replacementRange];
+    } else {
+        NSLog(@"Placeholder not found.");
+    }
+}
+
 - (void)createFastEnumerationLoop
 {
     if ([self.rawInputString rangeOfString:@" in collection "].location != NSNotFound) {
@@ -415,8 +431,11 @@ static SLSpeakIt *speaker = nil;
             if ([self.collectionsArray containsObject:arrName]) {
                 [self.variablesArray addObject:varName];
                 // Fix cursor position here
-                self.translatedCodeString = [NSString stringWithFormat:@"for (id %@ in %@) {\n\t\t}", varName, arrName];
+                self.translatedCodeString = [NSString stringWithFormat:@"for (id %@ in %@) {\n\t\t//placeholder\n\t}", varName, arrName];
                 [self replaceLineWithTranslatedCodeString];
+                // This is extremely hacky and will be replaced at some point, but it works for
+                // right now
+                [self deletePlaceholder];
             } else {
                 self.translatedCodeString = [NSString stringWithFormat:@"// Warning: The variable %@ or the collection %@ does not exist yet.\n\t", varName, arrName];
                 [self replaceLineWithTranslatedCodeString];
