@@ -182,14 +182,14 @@ static SLSpeakIt *speaker = nil;
     // Add an NSNumber variable type
     
     // Create an if statement. Condition: x < 5 etc.
-    
     // Else if at close-bracket (if so, then get condition: etc.
     // Else at close-bracket (if so, then end and replace with code
     
     // Create a while loop. Condition: etc.
+    // More difficult than originally anticipated.
+    // Consider this one after modularizing createReplacementRange.
     
     // Next line -> does a newline \n
-    
     // Previous line
     
     // Add a (void/bool/int/id/NSArray/etc.) method. Call it
@@ -200,6 +200,11 @@ static SLSpeakIt *speaker = nil;
         NSLog(@"No match of lineStart");
     }
 }
+
+// Organize these commands - put the delete commands in their own pragma section.
+// Ultimately move commands out to their own class file.
+// Modularize createReplacementRange in a method if possible.
+// Crashes if undo occurs while cursor is in the undo range. Move cursor before undo happens.
 
 - (void)setVariableNameAndValue
 {
@@ -395,14 +400,22 @@ static SLSpeakIt *speaker = nil;
         NSRange warningEndRange = [self.rawInputString rangeOfString:@" warning. Next.\n"];
         NSUInteger warningLength = (warningEndRange.location+15) - (warningStartRange.location);
         NSRange replacementRange = NSMakeRange(warningStartRange.location, warningLength);
+        // Remove the warning string from the translated code array
+        [self.translatedCodeArray removeObject:[self.translatedCodeArray lastObject]];
+        
+        // Delete the warning and the following "Delete warning" command.
         self.translatedCodeString = @"";
         [self.textView insertText:self.translatedCodeString replacementRange:replacementRange];
+        
+        // Reset to the new "last valid command" in case undo is used.
+        self.translatedCodeString = [self.translatedCodeArray lastObject];
     }
 }
 
 - (void)deletePlaceholder
 {
     // This is extremely hacky and will be replaced at some point. But it works for now.
+    // Except now it crashes the undo function, because it is hacky. Deal with this next week.
     if ([self.rawInputString rangeOfString:@"//placeholder"].location != NSNotFound) {
         NSRange placeholderStartRange = [self.rawInputString rangeOfString:@"//place" options:NSBackwardsSearch];
         NSRange placeholderEndRange = [self.rawInputString rangeOfString:@"holder" options:NSBackwardsSearch];
@@ -411,6 +424,9 @@ static SLSpeakIt *speaker = nil;
         self.translatedCodeString = @"";
         [self.textView setSelectedRange:replacementRange];
         [self.textView insertText:self.translatedCodeString replacementRange:replacementRange];
+        
+        // Reset to the last valid command in case undo is used.
+        self.translatedCodeString = [self.translatedCodeArray lastObject];
     } else {
         NSLog(@"Placeholder not found.");
     }
@@ -426,9 +442,15 @@ static SLSpeakIt *speaker = nil;
         NSRange undoEndRange = [self.rawInputString rangeOfString:@"Undo. Next.\n"];
         NSUInteger undoLength = (undoEndRange.location+11) - (undoStartRange.location);
         NSRange replacementRange = NSMakeRange(undoStartRange.location, undoLength);
+        // Remove the target command from the translated code array
         [self.translatedCodeArray removeObject:[self.translatedCodeArray lastObject]];
+        
+        // Delete the target command and the following "Undo" command.
         self.translatedCodeString = @"";
         [self.textView insertText:self.translatedCodeString replacementRange:replacementRange];
+        
+        // Reset to the new "last valid command" in case undo is used multiple times in a row.
+        self.translatedCodeString = [self.translatedCodeArray lastObject];
     }
 }
 
@@ -454,7 +476,7 @@ static SLSpeakIt *speaker = nil;
                 self.translatedCodeString = [NSString stringWithFormat:@"for (id %@ in %@) {\n\t\t//placeholder\n\t}", varName, arrName];
                 [self replaceLineWithTranslatedCodeString];
                 // This is extremely hacky and will be replaced at some point, but it works for
-                // right now
+                // right now, except when undo is used. This needs to be fixed.
                 [self deletePlaceholder];
             } else {
                 self.translatedCodeString = [NSString stringWithFormat:@"// Warning: The variable %@ or the collection %@ does not exist yet.\n\t", varName, arrName];
