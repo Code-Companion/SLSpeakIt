@@ -163,6 +163,11 @@ static SLSpeakIt *speaker = nil;
         self.lineStart = @"Create a fast enumeration loop. For ";
         [self createFastEnumerationLoop];
     
+    // case - undo last command
+    } else if ([self.rawInputString rangeOfString:@"Undo"].location != NSNotFound) {
+        self.lineStart = @"Undo";
+        [self undoLastCommand];
+    
 //    // case - create a loop
 //    } else if ([self.rawInputString rangeOfString:@"Create a loop"].location != NSNotFound) {
 //        self.lineStart = @"Create a loop";
@@ -411,6 +416,22 @@ static SLSpeakIt *speaker = nil;
     }
 }
 
+- (void)undoLastCommand
+{
+    if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
+        NSLog(@"Undo not confirmed");
+    } else {
+        NSRange undoStartRange = [self.rawInputString rangeOfString:self.translatedCodeString options:NSBackwardsSearch];
+        NSLog(@"self translatedCodeString is %@", self.translatedCodeString);
+        NSRange undoEndRange = [self.rawInputString rangeOfString:@"Undo. Next.\n"];
+        NSUInteger undoLength = (undoEndRange.location+11) - (undoStartRange.location);
+        NSRange replacementRange = NSMakeRange(undoStartRange.location, undoLength);
+        [self.translatedCodeArray removeObject:[self.translatedCodeArray lastObject]];
+        self.translatedCodeString = @"";
+        [self.textView insertText:self.translatedCodeString replacementRange:replacementRange];
+    }
+}
+
 - (void)createFastEnumerationLoop
 {
     if ([self.rawInputString rangeOfString:@" in collection "].location != NSNotFound) {
@@ -430,7 +451,6 @@ static SLSpeakIt *speaker = nil;
             // Check for array existence and then replace on-screen text with code
             if ([self.collectionsArray containsObject:arrName]) {
                 [self.variablesArray addObject:varName];
-                // Fix cursor position here
                 self.translatedCodeString = [NSString stringWithFormat:@"for (id %@ in %@) {\n\t\t//placeholder\n\t}", varName, arrName];
                 [self replaceLineWithTranslatedCodeString];
                 // This is extremely hacky and will be replaced at some point, but it works for
@@ -543,11 +563,6 @@ static SLSpeakIt *speaker = nil;
     }
 }
 
-// Make an undo function to delete the latest translatedCodeString from the screen
-// and remove it as lastObject from translatedCodeArray
-// If the words "Undo" appear on-screen, set that as lineRangeEnd and delete the whole string
-// from self.lineStart to lineRangeEnd, OR from self.translatedCodeString lastObject to lineRangeEnd.
-
 - (void)didClickStopSpeakIt:(id)sender
 {
     self.rawInputString = nil;
@@ -565,6 +580,5 @@ static SLSpeakIt *speaker = nil;
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
-
 
 @end
