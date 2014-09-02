@@ -16,7 +16,7 @@ Variable creation and assignment
 ---------------------------------
 + Create an integer variable. Call it [wildcard]. Equal to [wildcard]. Next.
 + Create a float variable. Call it [wildcard]. Equal to [wildcard]. Next.
-+ Create a double varaible. Call it [wildcard]. Equal to [wildcard]. Next.
++ Create a double variable. Call it [wildcard]. Equal to [wildcard]. Next.
 + Create a string variable. Call it [wildcard]. Equal to [wildcard]. Next.
 + Create an unsigned integer variable. Call it [wildcard]. Equal to [wildcard]. Next.
 
