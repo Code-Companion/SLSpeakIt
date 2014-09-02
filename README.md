@@ -2,6 +2,8 @@ SLSpeakIt
 =========
 An Xcode plugin that transforms text or voice input into valid code. This is pre-alpha software, do not expect perfection or even functionality!
 
+In progress and welcome collaborators.
+
 To install and start using the plugin
 --------------------------------------
 Download the plugin and open the SLSpeakIt.xcodeproj file in Xcode. Build and run it, then restart Xcode. You should see a new menu item ("Start SpeakIt") in Xcode's Edit menu. 
@@ -49,5 +51,3 @@ The command grammar will be refined toward a version 1.0 as more functionality i
 2. Clear enough for voice recognition to pick up (i.e., “Create” instead of “Make”).
 3. Detailed and unique enough to allow text replacement to find the right location in the file. 
 4. Concise enough to be typed as text without causing major headaches.
-
-In progress and welcome collaborators.
