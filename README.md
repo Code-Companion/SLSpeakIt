@@ -14,34 +14,34 @@ Currently, valid commands include:
 
 Variable creation and assignment
 ---------------------------------
-Create an integer variable. Call it [wildcard]. Equal to [wildcard]. Next.
-Create a float variable. Call it [wildcard]. Equal to [wildcard]. Next.
-Create a double varaible. Call it [wildcard]. Equal to [wildcard]. Next.
-Create a string variable. Call it [wildcard]. Equal to [wildcard]. Next.
-Create an unsigned integer variable. Call it [wildcard]. Equal to [wildcard]. Next.
++ Create an integer variable. Call it [wildcard]. Equal to [wildcard]. Next.
++ Create a float variable. Call it [wildcard]. Equal to [wildcard]. Next.
++ Create a double varaible. Call it [wildcard]. Equal to [wildcard]. Next.
++ Create a string variable. Call it [wildcard]. Equal to [wildcard]. Next.
++ Create an unsigned integer variable. Call it [wildcard]. Equal to [wildcard]. Next.
 
 Collection creation, population and selection
 ----------------------------------------------
-Create an array. Call it [wildcard]. Next.
-Create a mutable array. Call it [wildcard]. Next.
-Create a set. Call it [wildcard]. Next.
-Create a mutable set. Call it [wildcard]. Next.
-Put [wildcard] into collection [wildcard]. Next.
-Remove [wildcard] from collection [wildcard]. Next.
-Random item from collection [wildcard]. Next.
++ Create an array. Call it [wildcard]. Next.
++ Create a mutable array. Call it [wildcard]. Next.
++ Create a set. Call it [wildcard]. Next.
++ Create a mutable set. Call it [wildcard]. Next.
++ Put [wildcard] into collection [wildcard]. Next.
++ Remove [wildcard] from collection [wildcard]. Next.
++ Random item from collection [wildcard]. Next.
 
 Control flow
 -------------
-Create a fast enumeration loop. For [wildcard] in collection [wildcard]. Next.
++ Create a fast enumeration loop. For [wildcard] in collection [wildcard]. Next.
 
 Logging
 --------
-Print [wildcard]. Next.
++ Print [wildcard]. Next.
 
 Workflow
 ---------
-Delete warning. Next.
-Undo. Next. 
++ Delete warning. Next.
++ Undo. Next. 
 
 The command grammar will be refined toward a version 1.0 as more functionality is added. Commands need to be: 
 
