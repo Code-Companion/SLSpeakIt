@@ -1,6 +1,6 @@
 SLSpeakIt
 =========
-An Xcode plugin that transforms text or voice input into valid code. This is pre-alpha software, do not expect perfection or even functionality!
+An Xcode plugin that transforms text or voice input into valid code. This is pre-alpha software, do not expect perfection or even functionality! If you are using Yosemite, all bets are off.
 
 In progress and welcome collaborators.
 
@@ -42,6 +42,7 @@ Logging
 
 Workflow
 ---------
++ Did I declare [wildcard]. Next.
 + Delete warning. Next.
 + Undo. Next. 
 

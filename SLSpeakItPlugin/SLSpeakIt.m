@@ -153,6 +153,11 @@ static SLSpeakIt *speaker = nil;
         self.lineStart = @"Print ";
         [self logToConsole];
     
+    // case - check if variable or collection was declared
+    } else if ([self.rawInputString rangeOfString:@"Did I declare "].location != NSNotFound) {
+        self.lineStart = @"Did I declare ";
+        [self declarationCheck];
+        
     // case - delete warning
     } else if ([self.rawInputString rangeOfString:@"Delete warning"].location != NSNotFound) {
         self.lineStart = @"Delete warning";
@@ -167,6 +172,8 @@ static SLSpeakIt *speaker = nil;
     } else if ([self.rawInputString rangeOfString:@"Undo"].location != NSNotFound) {
         self.lineStart = @"Undo";
         [self undoLastCommand];
+        
+    //
     
 //    // case - create a loop
 //    } else if ([self.rawInputString rangeOfString:@"Create a loop"].location != NSNotFound) {
@@ -385,9 +392,31 @@ static SLSpeakIt *speaker = nil;
         NSRange printEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
         NSUInteger printLength = (printEndRange.location) - (printStartRange.location+6);
         NSString *printString = [self.rawInputString substringWithRange:NSMakeRange(printStartRange.location+6, printLength)];
-        
+            
         self.translatedCodeString = [NSString stringWithFormat:@"NSLog(@\"%@\");\n\t", printString];
         [self replaceLineWithTranslatedCodeString];
+    }
+}
+
+- (void)declarationCheck
+{
+    if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
+        NSLog(@"Variable or collection to check not identified");
+    } else {
+        // Get the variable or array name to check
+        NSRange varStartRange = [self.rawInputString rangeOfString:self.lineStart options:NSBackwardsSearch];
+        NSRange varEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
+        NSUInteger varLength = (varEndRange.location) - (varStartRange.location + self.lineStart.length);
+        NSString *varName = [self.rawInputString substringWithRange:NSMakeRange((varStartRange.location + self.lineStart.length), varLength)];
+        
+        // Look for a matching variable or array name
+        if ([self.collectionsArray containsObject:varName] || [self.variablesArray containsObject:varName]) {
+            self.translatedCodeString = [NSString stringWithFormat:@"// Warning: Not necessary. %@ exists.\n\t", varName];
+            [self replaceLineWithTranslatedCodeString];
+        } else {
+            self.translatedCodeString = [NSString stringWithFormat:@"// Warning: %@ does not exist yet.\n\t", varName];
+            [self replaceLineWithTranslatedCodeString];
+        }
     }
 }
 
@@ -401,7 +430,8 @@ static SLSpeakIt *speaker = nil;
         NSUInteger warningLength = (warningEndRange.location+15) - (warningStartRange.location);
         NSRange replacementRange = NSMakeRange(warningStartRange.location, warningLength);
         // Remove the warning string from the translated code array
-        [self.translatedCodeArray removeObject:[self.translatedCodeArray lastObject]];
+        // No longer necessary because added check in replaceLineWithTranslatedCodeString
+        // [self.translatedCodeArray removeObject:[self.translatedCodeArray lastObject]];
         
         // Delete the warning and the following "Delete warning" command.
         self.translatedCodeString = @"";
