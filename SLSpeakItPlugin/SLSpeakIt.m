@@ -73,6 +73,8 @@ static SLSpeakIt *speaker = nil;
     }
 }
 
+#pragma mark - case identification
+
 - (void)tryReplacingStringWithCode
 {
     // case - create an integer variable
@@ -173,8 +175,6 @@ static SLSpeakIt *speaker = nil;
         self.lineStart = @"Undo";
         [self undoLastCommand];
         
-    //
-    
 //    // case - create a loop
 //    } else if ([self.rawInputString rangeOfString:@"Create a loop"].location != NSNotFound) {
 //        self.lineStart = @"Create a loop";
@@ -212,6 +212,175 @@ static SLSpeakIt *speaker = nil;
 // Ultimately move commands out to their own class file.
 // Modularize createReplacementRange in a method if possible.
 // Crashes if undo occurs while cursor is in the undo range. Move cursor before undo happens.
+
+#pragma mark - code generation commands
+
+- (void)addToArrayOrSet
+{
+    // Get the object name to add
+    if ([self.rawInputString rangeOfString:@" into collection "].location != NSNotFound) {
+        NSRange varStartRange = [self.rawInputString rangeOfString:self.lineStart options:NSBackwardsSearch];
+        NSRange varEndRange = [self.rawInputString rangeOfString:@" into collection " options:NSBackwardsSearch];
+        NSUInteger varLength = (varEndRange.location) - (varStartRange.location+4);
+        NSString *varName = [self.rawInputString substringWithRange:NSMakeRange(varStartRange.location+4, varLength)];
+        
+        // Find out which array or set to put it in
+        if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
+            NSLog(@"No array or set name detected");
+        } else {
+            NSRange arrStartRange = [self.rawInputString rangeOfString:@" into collection " options:NSBackwardsSearch];
+            NSRange arrEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
+            NSUInteger arrLength = (arrEndRange.location) - (arrStartRange.location+17);
+            NSString *arrName = [self.rawInputString substringWithRange:NSMakeRange(arrStartRange.location+17, arrLength)];
+            
+            // Call a method to replace on-screen text with code
+            if ([self.collectionsArray containsObject:arrName] && [self.variablesArray containsObject:varName]) {
+                self.translatedCodeString = [NSString stringWithFormat:@"[%@ addObject:%@];\n\t", arrName, varName];
+                [self replaceLineWithTranslatedCodeString];
+            } else {
+                self.translatedCodeString = [NSString stringWithFormat:@"// Warning: The collection %@ or the variable %@ does not exist yet.\n\t", arrName, varName];
+                [self replaceLineWithTranslatedCodeString];
+            }
+        }
+    }
+}
+
+- (void)createFastEnumerationLoop
+{
+    if ([self.rawInputString rangeOfString:@" in collection "].location != NSNotFound) {
+        // Get the variable name
+        NSRange varStartRange = [self.rawInputString rangeOfString:self.lineStart options:NSBackwardsSearch];
+        NSRange varEndRange = [self.rawInputString rangeOfString:@" in collection " options:NSBackwardsSearch];
+        NSUInteger varLength = (varEndRange.location) - (varStartRange.location+self.lineStart.length);
+        NSString *varName = [self.rawInputString substringWithRange:NSMakeRange(varStartRange.location+self.lineStart.length, varLength)];
+        
+        if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
+            // Get the array name
+            NSRange arrStartRange = [self.rawInputString rangeOfString:@" in collection " options:NSBackwardsSearch];
+            NSRange arrEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
+            NSUInteger arrLength = (arrEndRange.location) - (arrStartRange.location+arrStartRange.length);
+            NSString *arrName = [self.rawInputString substringWithRange:NSMakeRange(arrStartRange.location+arrStartRange.length, arrLength)];
+            
+            // Check for array existence and then replace on-screen text with code
+            if ([self.collectionsArray containsObject:arrName]) {
+                [self.variablesArray addObject:varName];
+                self.translatedCodeString = [NSString stringWithFormat:@"for (id %@ in %@) {\n\t\t//placeholder\n\t}", varName, arrName];
+                [self replaceLineWithTranslatedCodeString];
+                // This is extremely hacky and will be replaced at some point, but it works for
+                // right now, except when undo is used. This needs to be fixed.
+                [self deletePlaceholder];
+            } else {
+                self.translatedCodeString = [NSString stringWithFormat:@"// Warning: The variable %@ or the collection %@ does not exist yet.\n\t", varName, arrName];
+                [self replaceLineWithTranslatedCodeString];
+            }
+        }
+    }
+}
+
+- (void)getRandomFromArrayOrSet
+{
+    if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
+        NSLog(@"No array or set name detected");
+    } else {
+        NSRange arrStartRange = [self.rawInputString rangeOfString:self.lineStart options:NSBackwardsSearch];
+        NSRange arrEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
+        NSUInteger arrLength = (arrEndRange.location) - (arrStartRange.location+28);
+        NSString *arrName = [self.rawInputString substringWithRange:NSMakeRange(arrStartRange.location+28, arrLength)];
+        NSLog(@"arrName is %@", arrName);
+        
+        // Call a method to replace on-screen text with code
+        if ([self.collectionsArray containsObject:arrName]) {
+            self.translatedCodeString = [NSString stringWithFormat:@"NSInteger index = arc4random() %% [%@ count];\n\tid randomObject = [%@ objectAtIndex:index];\n\t", arrName, arrName];
+            self.translatedCodeString = [self.translatedCodeString stringByAppendingString:@"NSLog(@\"Random object selected is %@.\", randomObject);\n\t"];
+            [self replaceLineWithTranslatedCodeString];
+        } else {
+            self.translatedCodeString = [NSString stringWithFormat:@"// Warning: The collection %@ does not exist yet.\n\t", arrName];
+            [self replaceLineWithTranslatedCodeString];
+        }
+    }
+}
+
+- (void)logToConsole
+{
+    if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
+        NSLog(@"String to print not detected");
+    } else {
+        // Get the string to print
+        NSRange printStartRange = [self.rawInputString rangeOfString:self.lineStart options:NSBackwardsSearch];
+        NSRange printEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
+        NSUInteger printLength = (printEndRange.location) - (printStartRange.location+6);
+        NSString *printString = [self.rawInputString substringWithRange:NSMakeRange(printStartRange.location+6, printLength)];
+        
+        self.translatedCodeString = [NSString stringWithFormat:@"NSLog(@\"%@\");\n\t", printString];
+        [self replaceLineWithTranslatedCodeString];
+    }
+}
+
+- (void)removeFromArrayOrSet
+{
+    // Get the object name to remove
+    if ([self.rawInputString rangeOfString:@" from collection "].location != NSNotFound) {
+        NSRange varStartRange = [self.rawInputString rangeOfString:self.lineStart options:NSBackwardsSearch];
+        NSRange varEndRange = [self.rawInputString rangeOfString:@" from collection " options:NSBackwardsSearch];
+        NSUInteger varLength = (varEndRange.location) - (varStartRange.location+7);
+        NSString *varName = [self.rawInputString substringWithRange:NSMakeRange(varStartRange.location+7, varLength)];
+        
+        // Find out which array or set to remove it from
+        if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
+            NSLog(@"No array or set name detected");
+        } else {
+            NSRange arrStartRange = [self.rawInputString rangeOfString:@" from collection " options:NSBackwardsSearch];
+            NSRange arrEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
+            NSUInteger arrLength = (arrEndRange.location) - (arrStartRange.location+17);
+            NSString *arrName = [self.rawInputString substringWithRange:NSMakeRange(arrStartRange.location+17, arrLength)];
+            
+            // Call a method to replace on-screen text with code
+            if ([self.collectionsArray containsObject:arrName] && [self.variablesArray containsObject:varName]) {
+                self.translatedCodeString = [NSString stringWithFormat:@"[%@ removeObject:%@];\n\t", arrName, varName];
+                [self replaceLineWithTranslatedCodeString];
+            } else {
+                self.translatedCodeString = [NSString stringWithFormat:@"// Warning: The collection %@ or the variable %@ does not exist yet.\n\t", arrName, varName];
+                [self replaceLineWithTranslatedCodeString];
+            }
+        }
+    }
+}
+
+- (void)resetVariableValue
+{
+    
+}
+
+- (void)setArrayOrSetName
+{
+    if ([self.rawInputString rangeOfString:@". Next."].location != NSNotFound) {
+        
+        // Find and set the array or set name
+        NSRange arrStartRange = [self.rawInputString rangeOfString:@"Call it " options:NSBackwardsSearch];
+        NSRange arrEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
+        NSUInteger arrLength = (arrEndRange.location) - (arrStartRange.location+8);
+        NSString *arrName = [self.rawInputString substringWithRange:NSMakeRange(arrStartRange.location+8, arrLength)];
+        [self.collectionsArray addObject:arrName];
+        
+        // Call a method to replace on-screen text with code
+        if ([self.lineStart isEqualToString:@"Create an array"]) {
+            self.translatedCodeString = [NSString stringWithFormat:@"NSArray *%@ = [[NSArray alloc] init];\n\t", arrName];
+            [self replaceLineWithTranslatedCodeString];
+        } else if ([self.lineStart isEqualToString:@"Create a mutable array"]) {
+            self.translatedCodeString = [NSString stringWithFormat:@"NSMutableArray *%@ = [[NSMutableArray alloc] init];\n\t", arrName];
+            [self replaceLineWithTranslatedCodeString];
+        } else if ([self.lineStart isEqualToString:@"Create a set"]) {
+            self.translatedCodeString = [NSString stringWithFormat:@"NSSet *%@ = [[NSSet alloc] init];\n\t", arrName];
+            [self replaceLineWithTranslatedCodeString];
+        } else if ([self.lineStart isEqualToString:@"Create a mutable set"]) {
+            self.translatedCodeString = [NSString stringWithFormat:@"NSMutableSet *%@ = [[NSMutableSet alloc] init];\n\t", arrName];
+            [self replaceLineWithTranslatedCodeString];
+        }
+        
+    } else {
+        NSLog(@"Array name not detected");
+    }
+}
 
 - (void)setVariableNameAndValue
 {
@@ -258,259 +427,6 @@ static SLSpeakIt *speaker = nil;
             } else {
                 value = @"Placeholder";
                 varName = @"Placeholder";
-            }
-        }
-    }
-}
-
-- (void)resetVariableValue
-{
-    
-}
-
-- (void)setArrayOrSetName
-{
-    if ([self.rawInputString rangeOfString:@". Next."].location != NSNotFound) {
-        
-        // Find and set the array or set name
-        NSRange arrStartRange = [self.rawInputString rangeOfString:@"Call it " options:NSBackwardsSearch];
-        NSRange arrEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
-        NSUInteger arrLength = (arrEndRange.location) - (arrStartRange.location+8);
-        NSString *arrName = [self.rawInputString substringWithRange:NSMakeRange(arrStartRange.location+8, arrLength)];
-        [self.collectionsArray addObject:arrName];
-        
-        // Call a method to replace on-screen text with code
-        if ([self.lineStart isEqualToString:@"Create an array"]) {
-            self.translatedCodeString = [NSString stringWithFormat:@"NSArray *%@ = [[NSArray alloc] init];\n\t", arrName];
-            [self replaceLineWithTranslatedCodeString];
-        } else if ([self.lineStart isEqualToString:@"Create a mutable array"]) {
-            self.translatedCodeString = [NSString stringWithFormat:@"NSMutableArray *%@ = [[NSMutableArray alloc] init];\n\t", arrName];
-            [self replaceLineWithTranslatedCodeString];
-        } else if ([self.lineStart isEqualToString:@"Create a set"]) {
-            self.translatedCodeString = [NSString stringWithFormat:@"NSSet *%@ = [[NSSet alloc] init];\n\t", arrName];
-            [self replaceLineWithTranslatedCodeString];
-        } else if ([self.lineStart isEqualToString:@"Create a mutable set"]) {
-            self.translatedCodeString = [NSString stringWithFormat:@"NSMutableSet *%@ = [[NSMutableSet alloc] init];\n\t", arrName];
-            [self replaceLineWithTranslatedCodeString];
-        }
-
-    } else {
-        NSLog(@"Array name not detected");
-    }
-}
-
-- (void)addToArrayOrSet
-{
-    // Get the object name to add
-    if ([self.rawInputString rangeOfString:@" into collection "].location != NSNotFound) {
-        NSRange varStartRange = [self.rawInputString rangeOfString:self.lineStart options:NSBackwardsSearch];
-        NSRange varEndRange = [self.rawInputString rangeOfString:@" into collection " options:NSBackwardsSearch];
-        NSUInteger varLength = (varEndRange.location) - (varStartRange.location+4);
-        NSString *varName = [self.rawInputString substringWithRange:NSMakeRange(varStartRange.location+4, varLength)];
-        
-        // Find out which array or set to put it in
-        if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
-            NSLog(@"No array or set name detected");
-        } else {
-            NSRange arrStartRange = [self.rawInputString rangeOfString:@" into collection " options:NSBackwardsSearch];
-            NSRange arrEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
-            NSUInteger arrLength = (arrEndRange.location) - (arrStartRange.location+17);
-            NSString *arrName = [self.rawInputString substringWithRange:NSMakeRange(arrStartRange.location+17, arrLength)];
-            
-            // Call a method to replace on-screen text with code
-            if ([self.collectionsArray containsObject:arrName] && [self.variablesArray containsObject:varName]) {
-                self.translatedCodeString = [NSString stringWithFormat:@"[%@ addObject:%@];\n\t", arrName, varName];
-                [self replaceLineWithTranslatedCodeString];
-            } else {
-                self.translatedCodeString = [NSString stringWithFormat:@"// Warning: The collection %@ or the variable %@ does not exist yet.\n\t", arrName, varName];
-                [self replaceLineWithTranslatedCodeString];
-            }
-        }
-    }
-}
-
-- (void)getRandomFromArrayOrSet
-{
-    if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
-        NSLog(@"No array or set name detected");
-    } else {
-        NSRange arrStartRange = [self.rawInputString rangeOfString:self.lineStart options:NSBackwardsSearch];
-        NSRange arrEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
-        NSUInteger arrLength = (arrEndRange.location) - (arrStartRange.location+28);
-        NSString *arrName = [self.rawInputString substringWithRange:NSMakeRange(arrStartRange.location+28, arrLength)];
-        NSLog(@"arrName is %@", arrName);
-        
-        // Call a method to replace on-screen text with code
-        if ([self.collectionsArray containsObject:arrName]) {
-            self.translatedCodeString = [NSString stringWithFormat:@"NSInteger index = arc4random() %% [%@ count];\n\tid randomObject = [%@ objectAtIndex:index];\n\t", arrName, arrName];
-            self.translatedCodeString = [self.translatedCodeString stringByAppendingString:@"NSLog(@\"Random object selected is %@.\", randomObject);\n\t"];
-            [self replaceLineWithTranslatedCodeString];
-        } else {
-            self.translatedCodeString = [NSString stringWithFormat:@"// Warning: The collection %@ does not exist yet.\n\t", arrName];
-            [self replaceLineWithTranslatedCodeString];
-        }
-    }
-}
-
-- (void)removeFromArrayOrSet
-{
-    // Get the object name to remove
-    if ([self.rawInputString rangeOfString:@" from collection "].location != NSNotFound) {
-        NSRange varStartRange = [self.rawInputString rangeOfString:self.lineStart options:NSBackwardsSearch];
-        NSRange varEndRange = [self.rawInputString rangeOfString:@" from collection " options:NSBackwardsSearch];
-        NSUInteger varLength = (varEndRange.location) - (varStartRange.location+7);
-        NSString *varName = [self.rawInputString substringWithRange:NSMakeRange(varStartRange.location+7, varLength)];
-
-        // Find out which array or set to remove it from
-        if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
-            NSLog(@"No array or set name detected");
-        } else {
-            NSRange arrStartRange = [self.rawInputString rangeOfString:@" from collection " options:NSBackwardsSearch];
-            NSRange arrEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
-            NSUInteger arrLength = (arrEndRange.location) - (arrStartRange.location+17);
-            NSString *arrName = [self.rawInputString substringWithRange:NSMakeRange(arrStartRange.location+17, arrLength)];
-            
-            // Call a method to replace on-screen text with code
-            if ([self.collectionsArray containsObject:arrName] && [self.variablesArray containsObject:varName]) {
-                self.translatedCodeString = [NSString stringWithFormat:@"[%@ removeObject:%@];\n\t", arrName, varName];
-                [self replaceLineWithTranslatedCodeString];
-            } else {
-                self.translatedCodeString = [NSString stringWithFormat:@"// Warning: The collection %@ or the variable %@ does not exist yet.\n\t", arrName, varName];
-                [self replaceLineWithTranslatedCodeString];
-            }
-        }
-    }
-}
-
-- (void)logToConsole
-{
-    if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
-        NSLog(@"String to print not detected");
-    } else {
-        // Get the string to print
-        NSRange printStartRange = [self.rawInputString rangeOfString:self.lineStart options:NSBackwardsSearch];
-        NSRange printEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
-        NSUInteger printLength = (printEndRange.location) - (printStartRange.location+6);
-        NSString *printString = [self.rawInputString substringWithRange:NSMakeRange(printStartRange.location+6, printLength)];
-            
-        self.translatedCodeString = [NSString stringWithFormat:@"NSLog(@\"%@\");\n\t", printString];
-        [self replaceLineWithTranslatedCodeString];
-    }
-}
-
-- (void)declarationCheck
-{
-    if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
-        NSLog(@"Variable or collection to check not identified");
-    } else {
-        // Get the variable or array name to check
-        NSRange varStartRange = [self.rawInputString rangeOfString:self.lineStart options:NSBackwardsSearch];
-        NSRange varEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
-        NSUInteger varLength = (varEndRange.location) - (varStartRange.location + self.lineStart.length);
-        NSString *varName = [self.rawInputString substringWithRange:NSMakeRange((varStartRange.location + self.lineStart.length), varLength)];
-        
-        // Look for a matching variable or array name
-        if ([self.collectionsArray containsObject:varName] || [self.variablesArray containsObject:varName]) {
-            self.translatedCodeString = [NSString stringWithFormat:@"// Warning: Not necessary. %@ exists.\n\t", varName];
-            [self replaceLineWithTranslatedCodeString];
-        } else {
-            self.translatedCodeString = [NSString stringWithFormat:@"// Warning: %@ does not exist yet.\n\t", varName];
-            [self replaceLineWithTranslatedCodeString];
-        }
-    }
-}
-
-- (void)deleteWarning
-{
-    if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
-        NSLog(@"Warning deletion not confirmed");
-    } else {
-        NSRange warningStartRange = [self.rawInputString rangeOfString:@"// Warning: " options:NSBackwardsSearch];
-        NSRange warningEndRange = [self.rawInputString rangeOfString:@" warning. Next.\n"];
-        NSUInteger warningLength = (warningEndRange.location+15) - (warningStartRange.location);
-        NSRange replacementRange = NSMakeRange(warningStartRange.location, warningLength);
-        // Remove the warning string from the translated code array
-        // No longer necessary because added check in replaceLineWithTranslatedCodeString
-        // [self.translatedCodeArray removeObject:[self.translatedCodeArray lastObject]];
-        
-        // Delete the warning and the following "Delete warning" command.
-        self.translatedCodeString = @"";
-        [self.textView insertText:self.translatedCodeString replacementRange:replacementRange];
-        
-        // Reset to the new "last valid command" in case undo is used.
-        self.translatedCodeString = [self.translatedCodeArray lastObject];
-    }
-}
-
-- (void)deletePlaceholder
-{
-    // This is extremely hacky and will be replaced at some point. But it works for now.
-    // Except now it crashes the undo function, because it is hacky. Deal with this next week.
-    if ([self.rawInputString rangeOfString:@"//placeholder"].location != NSNotFound) {
-        NSRange placeholderStartRange = [self.rawInputString rangeOfString:@"//place" options:NSBackwardsSearch];
-        NSRange placeholderEndRange = [self.rawInputString rangeOfString:@"holder" options:NSBackwardsSearch];
-        NSUInteger placeholderLength = (placeholderEndRange.location+6) - (placeholderStartRange.location);
-        NSRange replacementRange = NSMakeRange(placeholderStartRange.location, placeholderLength);
-        self.translatedCodeString = @"";
-        [self.textView setSelectedRange:replacementRange];
-        [self.textView insertText:self.translatedCodeString replacementRange:replacementRange];
-        
-        // Reset to the last valid command in case undo is used.
-        self.translatedCodeString = [self.translatedCodeArray lastObject];
-    } else {
-        NSLog(@"Placeholder not found.");
-    }
-}
-
-- (void)undoLastCommand
-{
-    if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
-        NSLog(@"Undo not confirmed");
-    } else {
-        NSRange undoStartRange = [self.rawInputString rangeOfString:self.translatedCodeString options:NSBackwardsSearch];
-        NSLog(@"self translatedCodeString is %@", self.translatedCodeString);
-        NSRange undoEndRange = [self.rawInputString rangeOfString:@"Undo. Next.\n"];
-        NSUInteger undoLength = (undoEndRange.location+11) - (undoStartRange.location);
-        NSRange replacementRange = NSMakeRange(undoStartRange.location, undoLength);
-        // Remove the target command from the translated code array
-        [self.translatedCodeArray removeObject:[self.translatedCodeArray lastObject]];
-        
-        // Delete the target command and the following "Undo" command.
-        self.translatedCodeString = @"";
-        [self.textView insertText:self.translatedCodeString replacementRange:replacementRange];
-        
-        // Reset to the new "last valid command" in case undo is used multiple times in a row.
-        self.translatedCodeString = [self.translatedCodeArray lastObject];
-    }
-}
-
-- (void)createFastEnumerationLoop
-{
-    if ([self.rawInputString rangeOfString:@" in collection "].location != NSNotFound) {
-        // Get the variable name
-        NSRange varStartRange = [self.rawInputString rangeOfString:self.lineStart options:NSBackwardsSearch];
-        NSRange varEndRange = [self.rawInputString rangeOfString:@" in collection " options:NSBackwardsSearch];
-        NSUInteger varLength = (varEndRange.location) - (varStartRange.location+self.lineStart.length);
-        NSString *varName = [self.rawInputString substringWithRange:NSMakeRange(varStartRange.location+self.lineStart.length, varLength)];
-        
-        if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
-            // Get the array name
-            NSRange arrStartRange = [self.rawInputString rangeOfString:@" in collection " options:NSBackwardsSearch];
-            NSRange arrEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
-            NSUInteger arrLength = (arrEndRange.location) - (arrStartRange.location+arrStartRange.length);
-            NSString *arrName = [self.rawInputString substringWithRange:NSMakeRange(arrStartRange.location+arrStartRange.length, arrLength)];
-            
-            // Check for array existence and then replace on-screen text with code
-            if ([self.collectionsArray containsObject:arrName]) {
-                [self.variablesArray addObject:varName];
-                self.translatedCodeString = [NSString stringWithFormat:@"for (id %@ in %@) {\n\t\t//placeholder\n\t}", varName, arrName];
-                [self replaceLineWithTranslatedCodeString];
-                // This is extremely hacky and will be replaced at some point, but it works for
-                // right now, except when undo is used. This needs to be fixed.
-                [self deletePlaceholder];
-            } else {
-                self.translatedCodeString = [NSString stringWithFormat:@"// Warning: The variable %@ or the collection %@ does not exist yet.\n\t", varName, arrName];
-                [self replaceLineWithTranslatedCodeString];
             }
         }
     }
@@ -595,6 +511,97 @@ static SLSpeakIt *speaker = nil;
 //    }
 //}
 
+
+#pragma mark - workflow methods
+
+- (void)declarationCheck
+{
+    if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
+        NSLog(@"Variable or collection to check not identified");
+    } else {
+        // Get the variable or array name to check
+        NSRange varStartRange = [self.rawInputString rangeOfString:self.lineStart options:NSBackwardsSearch];
+        NSRange varEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
+        NSUInteger varLength = (varEndRange.location) - (varStartRange.location + self.lineStart.length);
+        NSString *varName = [self.rawInputString substringWithRange:NSMakeRange((varStartRange.location + self.lineStart.length), varLength)];
+        
+        // Look for a matching variable or array name
+        if ([self.collectionsArray containsObject:varName] || [self.variablesArray containsObject:varName]) {
+            self.translatedCodeString = [NSString stringWithFormat:@"// Warning: Not necessary. %@ exists.\n\t", varName];
+            [self replaceLineWithTranslatedCodeString];
+        } else {
+            self.translatedCodeString = [NSString stringWithFormat:@"// Warning: %@ does not exist yet.\n\t", varName];
+            [self replaceLineWithTranslatedCodeString];
+        }
+    }
+}
+
+- (void)deleteWarning
+{
+    if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
+        NSLog(@"Warning deletion not confirmed");
+    } else {
+        NSRange warningStartRange = [self.rawInputString rangeOfString:@"// Warning: " options:NSBackwardsSearch];
+        NSRange warningEndRange = [self.rawInputString rangeOfString:@" warning. Next.\n"];
+        NSUInteger warningLength = (warningEndRange.location+15) - (warningStartRange.location);
+        NSRange replacementRange = NSMakeRange(warningStartRange.location, warningLength);
+        // Remove the warning string from the translated code array
+        // No longer necessary because added check in replaceLineWithTranslatedCodeString
+        // [self.translatedCodeArray removeObject:[self.translatedCodeArray lastObject]];
+        
+        // Delete the warning and the following "Delete warning" command.
+        self.translatedCodeString = @"";
+        [self.textView insertText:self.translatedCodeString replacementRange:replacementRange];
+        
+        // Reset to the new "last valid command" in case undo is used.
+        self.translatedCodeString = [self.translatedCodeArray lastObject];
+    }
+}
+
+- (void)undoLastCommand
+{
+    if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
+        NSLog(@"Undo not confirmed");
+    } else {
+        NSRange undoStartRange = [self.rawInputString rangeOfString:self.translatedCodeString options:NSBackwardsSearch];
+        NSLog(@"self translatedCodeString is %@", self.translatedCodeString);
+        NSRange undoEndRange = [self.rawInputString rangeOfString:@"Undo. Next.\n"];
+        NSUInteger undoLength = (undoEndRange.location+11) - (undoStartRange.location);
+        NSRange replacementRange = NSMakeRange(undoStartRange.location, undoLength);
+        // Remove the target command from the translated code array
+        [self.translatedCodeArray removeObject:[self.translatedCodeArray lastObject]];
+        
+        // Delete the target command and the following "Undo" command.
+        self.translatedCodeString = @"";
+        [self.textView insertText:self.translatedCodeString replacementRange:replacementRange];
+        
+        // Reset to the new "last valid command" in case undo is used multiple times in a row.
+        self.translatedCodeString = [self.translatedCodeArray lastObject];
+    }
+}
+
+#pragma mark - internal methods
+
+- (void)deletePlaceholder
+{
+    // This is extremely hacky and will be replaced at some point. But it works for now.
+    // Except now it crashes the undo function, because it is hacky. Deal with this next week.
+    if ([self.rawInputString rangeOfString:@"//placeholder"].location != NSNotFound) {
+        NSRange placeholderStartRange = [self.rawInputString rangeOfString:@"//place" options:NSBackwardsSearch];
+        NSRange placeholderEndRange = [self.rawInputString rangeOfString:@"holder" options:NSBackwardsSearch];
+        NSUInteger placeholderLength = (placeholderEndRange.location+6) - (placeholderStartRange.location);
+        NSRange replacementRange = NSMakeRange(placeholderStartRange.location, placeholderLength);
+        self.translatedCodeString = @"";
+        [self.textView setSelectedRange:replacementRange];
+        [self.textView insertText:self.translatedCodeString replacementRange:replacementRange];
+        
+        // Reset to the last valid command in case undo is used.
+        self.translatedCodeString = [self.translatedCodeArray lastObject];
+    } else {
+        NSLog(@"Placeholder not found.");
+    }
+}
+
 - (void)replaceLineWithTranslatedCodeString
 {
     // First we get the user's original input as a range in textStorage, so we can replace it with code.
@@ -614,6 +621,8 @@ static SLSpeakIt *speaker = nil;
         [self.translatedCodeArray addObject:self.translatedCodeString];
     }
 }
+
+#pragma mark - closedown methods
 
 - (void)didClickStopSpeakIt:(id)sender
 {
