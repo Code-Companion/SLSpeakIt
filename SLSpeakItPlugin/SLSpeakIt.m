@@ -79,79 +79,66 @@ static SLSpeakIt *speaker = nil;
 {
     // case - create an integer variable
     if ([self.rawInputString rangeOfString:@"Create an integer variable. Call it "].location != NSNotFound) {
-        NSLog(@"Found match of lineStart");
         self.lineStart = @"Create an integer variable";
         [self setVariableNameAndValue];
     
     // case - create a float variable
     } else if ([self.rawInputString rangeOfString:@"Create a float variable. Call it "].location != NSNotFound) {
-        NSLog(@"Found match of lineStart");
         self.lineStart = @"Create a float variable";
         [self setVariableNameAndValue];
     
     // case - create a double variable
     } else if ([self.rawInputString rangeOfString:@"Create a double variable. Call it "].location != NSNotFound) {
-        NSLog(@"Found match of lineStart");
         self.lineStart = @"Create a double variable";
         [self setVariableNameAndValue];
         
     // case - create a string variable
     } else if ([self.rawInputString rangeOfString:@"Create a string variable. Call it "].location != NSNotFound) {
-        NSLog(@"Found match of lineStart");
         self.lineStart = @"Create a string variable";
         [self setVariableNameAndValue];
     
     // case - create an unsigned integer NSUInteger variable
     } else if ([self.rawInputString rangeOfString:@"Create an unsigned integer variable. Call it "].location != NSNotFound) {
-        NSLog(@"Found match of lineStart");
         self.lineStart = @"Create an unsigned integer variable";
         [self setVariableNameAndValue];
     
     // case - create an array
     } else if ([self.rawInputString rangeOfString:@"Create an array. Call it "].location != NSNotFound) {
-        NSLog(@"Found match of lineStart");
         self.lineStart = @"Create an array";
         [self setArrayOrSetName];
         
     // case - create a mutable array
     } else if ([self.rawInputString rangeOfString:@"Create a mutable array. Call it "].location != NSNotFound) {
-        NSLog(@"Found match of lineStart");
         self.lineStart = @"Create a mutable array";
         [self setArrayOrSetName];
         
     // case - create a set
     } else if ([self.rawInputString rangeOfString:@"Create a set. Call it "].location != NSNotFound) {
-        NSLog(@"Found match of lineStart");
         self.lineStart = @"Create a set";
         [self setArrayOrSetName];
     
     // case - create a mutable set
     } else if ([self.rawInputString rangeOfString:@"Create a mutable set. Call it "].location != NSNotFound) {
-        NSLog(@"Found match of lineStart");
         self.lineStart = @"Create a mutable set";
         [self setArrayOrSetName];
         
     // case - add to array or set
     } else if ([self.rawInputString rangeOfString:@"Put "].location != NSNotFound) {
-        NSLog(@"Found match of lineStart");
         self.lineStart = @"Put ";
         [self addToArrayOrSet];
         
     // case - remove from array or set
     } else if ([self.rawInputString rangeOfString:@"Remove "].location != NSNotFound) {
-        NSLog(@"Found match of lineStart");
         self.lineStart = @"Remove ";
         [self removeFromArrayOrSet];
 
     // case - get random object from array or set
     } else if ([self.rawInputString rangeOfString:@"Random item from collection "].location != NSNotFound) {
-        NSLog(@"Found match of lineStart");
         self.lineStart = @"Random item from collection ";
         [self getRandomFromArrayOrSet];
         
     // case - log to console
     } else if ([self.rawInputString rangeOfString:@"Print "].location != NSNotFound) {
-        NSLog(@"Found match of lineStart");
         self.lineStart = @"Print ";
         [self logToConsole];
     
@@ -208,7 +195,6 @@ static SLSpeakIt *speaker = nil;
     }
 }
 
-// Organize these commands - put the delete commands in their own pragma section.
 // Ultimately move commands out to their own class file.
 // Modularize createReplacementRange in a method if possible.
 // Crashes if undo occurs while cursor is in the undo range. Move cursor before undo happens.
@@ -520,17 +506,16 @@ static SLSpeakIt *speaker = nil;
         NSLog(@"Variable or collection to check not identified");
     } else {
         // Get the variable or array name to check
-        NSRange varStartRange = [self.rawInputString rangeOfString:self.lineStart options:NSBackwardsSearch];
-        NSRange varEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
-        NSUInteger varLength = (varEndRange.location) - (varStartRange.location + self.lineStart.length);
-        NSString *varName = [self.rawInputString substringWithRange:NSMakeRange((varStartRange.location + self.lineStart.length), varLength)];
+        self.markBegin = self.lineStart;
+        self.markEnd = @". Next.\n";
+        [self findWildcardItemName];
         
         // Look for a matching variable or array name
-        if ([self.collectionsArray containsObject:varName] || [self.variablesArray containsObject:varName]) {
-            self.translatedCodeString = [NSString stringWithFormat:@"// Warning: Not necessary. %@ exists.\n\t", varName];
+        if ([self.collectionsArray containsObject:self.varName] || [self.variablesArray containsObject:self.varName]) {
+            self.translatedCodeString = [NSString stringWithFormat:@"// Warning: Not necessary. %@ exists.\n\t", self.varName];
             [self replaceLineWithTranslatedCodeString];
         } else {
-            self.translatedCodeString = [NSString stringWithFormat:@"// Warning: %@ does not exist yet.\n\t", varName];
+            self.translatedCodeString = [NSString stringWithFormat:@"// Warning: %@ does not exist yet.\n\t", self.varName];
             [self replaceLineWithTranslatedCodeString];
         }
     }
@@ -545,15 +530,15 @@ static SLSpeakIt *speaker = nil;
         NSRange warningEndRange = [self.rawInputString rangeOfString:@" warning. Next.\n"];
         NSUInteger warningLength = (warningEndRange.location+15) - (warningStartRange.location);
         NSRange replacementRange = NSMakeRange(warningStartRange.location, warningLength);
-        // Remove the warning string from the translated code array
-        // No longer necessary because added check in replaceLineWithTranslatedCodeString
-        // [self.translatedCodeArray removeObject:[self.translatedCodeArray lastObject]];
+        
+        // replaceLineWithTranslatedCodeString will remove the warning string from the
+        // translated code array
         
         // Delete the warning and the following "Delete warning" command.
         self.translatedCodeString = @"";
         [self.textView insertText:self.translatedCodeString replacementRange:replacementRange];
         
-        // Reset to the new "last valid command" in case undo is used.
+        // Reset to the new "last valid command" in case undo is used later.
         self.translatedCodeString = [self.translatedCodeArray lastObject];
     }
 }
@@ -600,6 +585,23 @@ static SLSpeakIt *speaker = nil;
     } else {
         NSLog(@"Placeholder not found.");
     }
+}
+
+- (void)findReplacementRange
+{
+    NSRange replacementStartRange = [self.rawInputString rangeOfString:self.markBegin options:NSBackwardsSearch];
+    NSRange replacementEndRange = [self.rawInputString rangeOfString:self.markEnd options:NSBackwardsSearch];
+    NSUInteger replacementLength = (replacementEndRange.location + self.markEnd.length) - (replacementStartRange.location);
+    // replace this with self.replacementRange when sure it won't mess anything else up
+    NSRange replacementRange = NSMakeRange(replacementStartRange.location, replacementLength);
+}
+
+- (void)findWildcardItemName
+{
+    NSRange varStartRange = [self.rawInputString rangeOfString:self.markBegin options:NSBackwardsSearch];
+    NSRange varEndRange = [self.rawInputString rangeOfString:self.markEnd options:NSBackwardsSearch];
+    NSUInteger varLength = (varEndRange.location) - (varStartRange.location + self.markBegin.length);
+    self.varName = [self.rawInputString substringWithRange:NSMakeRange((varStartRange.location + self.markBegin.length), varLength)];
 }
 
 - (void)replaceLineWithTranslatedCodeString
