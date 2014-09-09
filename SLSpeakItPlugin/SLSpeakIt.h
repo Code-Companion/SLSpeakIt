@@ -19,6 +19,8 @@
 @property (strong, nonatomic) NSString *markBegin;
 @property (strong, nonatomic) NSString *markEnd;
 @property (strong, nonatomic) NSString *varName;
+@property (strong, nonatomic) NSString *secondVarName;
+@property (nonatomic) NSRange replacementRange;
 @property (strong, nonatomic) NSMutableArray *translatedCodeArray;
 @property (strong, nonatomic) NSString *previousInput;
 @property (strong, nonatomic) NSMutableArray *previousInputArray;
