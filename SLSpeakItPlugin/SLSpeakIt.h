@@ -18,8 +18,11 @@
 @property (strong, nonatomic) NSString *lineStart;
 @property (strong, nonatomic) NSString *markBegin;
 @property (strong, nonatomic) NSString *markEnd;
+@property (strong, nonatomic) NSString *wildcardItemName;
 @property (strong, nonatomic) NSString *varName;
 @property (strong, nonatomic) NSString *secondVarName;
+@property (strong, nonatomic) NSString *conditionOperator;
+@property (strong, nonatomic) NSString *conditionLimit;
 @property (nonatomic) NSRange replacementRange;
 @property (strong, nonatomic) NSMutableArray *translatedCodeArray;
 @property (strong, nonatomic) NSString *previousInput;
