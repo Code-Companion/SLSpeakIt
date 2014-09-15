@@ -269,6 +269,7 @@ static SLSpeakIt *speaker = nil;
 - (void)createWhileLoop
 {
     // For now, varName should be a previously declared variable
+    // A warning is generated otherwise
     if ([self.rawInputString rangeOfString:@" condition is "].location != NSNotFound) {
         self.markBegin = self.lineStart;
         self.markEnd = @" condition is ";
@@ -291,6 +292,23 @@ static SLSpeakIt *speaker = nil;
         } else {
             NSLog(@"Loop condition operator not detected");
         }
+        
+    } else if ([self.rawInputString rangeOfString:@" exists. Next.\n"].location != NSNotFound) {
+        self.markBegin = self.lineStart;
+        self.markEnd = @" exists. Next.\n";
+        self.varName = [self findWildcardItemName];
+        self.translatedCodeString = [NSString stringWithFormat:@"while (%@) {\n\t\t//placeholder\n\t}", self.varName];
+        [self replaceLineWithTranslatedCodeString];
+        [self deletePlaceholder];
+    
+    } else if ([self.rawInputString rangeOfString:@" does not exist. Next.\n"].location != NSNotFound) {
+        self.markBegin = self.lineStart;
+        self.markEnd = @" does not exist. Next.\n";
+        self.varName = [self findWildcardItemName];
+        self.translatedCodeString = [NSString stringWithFormat:@"while (!%@) {\n\t\t//placeholder\n\t}", self.varName];
+        [self replaceLineWithTranslatedCodeString];
+        [self deletePlaceholder];
+        
     } else {
         NSLog(@"Loop variable not detected");
     }
