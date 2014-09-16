@@ -166,6 +166,11 @@ static SLSpeakIt *speaker = nil;
     } else if ([self.rawInputString rangeOfString:@"Create a while loop. While "].location != NSNotFound) {
         self.lineStart = @"Create a while loop. While ";
         [self createWhileLoop];
+    
+    // case - create a for loop
+    } else if ([self.rawInputString rangeOfString:@"Create a for loop from start point "].location != NSNotFound) {
+        self.lineStart = @"Create a for loop from start point ";
+        [self createForLoop];
         
 //    // case - create an if statement
 //    } else if ([self.rawInputString rangeOfString:@"Create an if statement"].location != NSNotFound) {
@@ -263,6 +268,46 @@ static SLSpeakIt *speaker = nil;
         }
     } else {
         NSLog(@"Item identifier not detected");
+    }
+}
+
+- (void)createForLoop
+{
+    // This method creates a for loop with certain bounds. For now, it uses a generic variable 'i'
+    if ([self.rawInputString rangeOfString:@" to end point "].location != NSNotFound) {
+        self.markBegin = self.lineStart;
+        self.markEnd = @" to end point ";
+        self.varName = [self findWildcardItemName];
+        
+        if ([self.rawInputString rangeOfString:@", counting "].location != NSNotFound) {
+            self.markBegin = self.markEnd;
+            self.markEnd = @", counting ";
+            self.secondVarName = [self findWildcardItemName];
+            NSLog(@"secondVarName is %@", self.secondVarName);
+            
+            if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
+                self.markBegin = self.markEnd;
+                self.markEnd = @". Next.\n";
+                self.incrementDirection = [self findWildcardItemName];
+                [self parseForLoopVariables];
+                
+                // This may create a small bug, keep it in mind and check it later
+                if ([self.translatedCodeString rangeOfString:@"// Warning: The collection "].location == NSNotFound) {
+                    self.translatedCodeString = [NSString stringWithFormat:@"for (var i = %@; i %@; %@) {\n\t\t//placeholder\n\t}", self.varName, self.secondVarName, self.incrementDirection];
+                } else {
+                    NSLog(@"The collection referenced in the end point does not exist yet. Please create it before creating the loop.");
+                }
+                [self replaceLineWithTranslatedCodeString];
+                [self deletePlaceholder];
+                
+            } else {
+                NSLog(@"Increment direction not detected.");
+            }
+        } else {
+            NSLog(@"End point not detected.");
+        }
+    } else {
+        NSLog(@"Start point not detected.");
     }
 }
 
@@ -682,6 +727,55 @@ static SLSpeakIt *speaker = nil;
     NSUInteger varLength = (varEndRange.location) - (varStartRange.location + self.markBegin.length);
     self.wildcardItemName = [self.rawInputString substringWithRange:NSMakeRange((varStartRange.location + self.markBegin.length), varLength)];
     return self.wildcardItemName;
+}
+
+- (void)parseForLoopVariables
+{
+    // Based on the increment direction (up or down), transform the end point variable
+    // into a condition operator plus the appropriate variable. This method allows use of
+    // [array count] as an end point, if the array has been declared.
+    if ([self.incrementDirection isEqualToString:@"up"]) {
+        if ([self.secondVarName rangeOfString:@" count"].location != NSNotFound) {
+            self.secondVarName = [self.secondVarName substringToIndex:[self.secondVarName length] - 6];
+            if ([self.collectionsArray containsObject:self.secondVarName]) {
+                self.secondVarName = [NSString stringWithFormat:@"< [%@ count]", self.secondVarName];
+            } else {
+                self.translatedCodeString = [NSString stringWithFormat:@"// Warning: The collection %@ does not exist yet.\n\t", self.secondVarName];
+                NSLog(@"translatedCodeString is %@", self.translatedCodeString);
+            }
+        // It tacks on "inclusive" here, fix this later
+        } else if ([self.secondVarName rangeOfString:@", inclusive"].location != NSNotFound) {
+            self.secondVarName = [NSString stringWithFormat:@"<= %@", self.secondVarName];
+        } else {
+            self.secondVarName = [NSString stringWithFormat:@"< %@", self.secondVarName];
+        }
+    } else if ([self.incrementDirection isEqualToString:@"down"]) {
+        // It tacks on "inclusive" here, fix this later
+        if ([self.secondVarName rangeOfString:@" count"].location != NSNotFound) {
+            self.secondVarName = [self.secondVarName substringToIndex:[self.secondVarName length] - 6];
+            if ([self.collectionsArray containsObject:self.secondVarName]) {
+                self.secondVarName = [NSString stringWithFormat:@"> [%@ count]", self.secondVarName];
+            } else {
+                self.translatedCodeString = [NSString stringWithFormat:@"// Warning: The collection %@ does not exist yet.\n\t", self.secondVarName];
+                NSLog(@"translatedCodeString is %@", self.translatedCodeString);
+            }
+        } else if ([self.secondVarName rangeOfString:@", inclusive"].location != NSNotFound) {
+            self.secondVarName = [NSString stringWithFormat:@">= %@", self.secondVarName];
+        } else {
+            self.secondVarName = [NSString stringWithFormat:@"> %@", self.secondVarName];
+        }
+    } else {
+        NSLog(@"Could not parse the increment direction.");
+    }
+    
+    // Now transform the increment direction into valid code
+    if ([self.incrementDirection isEqualToString:@"up"]) {
+        self.incrementDirection = @"i++";
+    } else if ([self.incrementDirection isEqualToString:@"down"]) {
+        self.incrementDirection = @"i--";
+    } else {
+        NSLog(@"Could not parse the increment direction.");
+    }
 }
 
 - (void)replaceLineWithTranslatedCodeString

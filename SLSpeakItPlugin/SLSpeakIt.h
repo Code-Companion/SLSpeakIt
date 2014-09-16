@@ -23,6 +23,7 @@
 @property (strong, nonatomic) NSString *secondVarName;
 @property (strong, nonatomic) NSString *conditionOperator;
 @property (strong, nonatomic) NSString *conditionLimit;
+@property (strong, nonatomic) NSString *incrementDirection;
 @property (nonatomic) NSRange replacementRange;
 @property (strong, nonatomic) NSMutableArray *translatedCodeArray;
 @property (strong, nonatomic) NSString *previousInput;
