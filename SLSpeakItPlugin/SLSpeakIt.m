@@ -208,15 +208,13 @@ static SLSpeakIt *speaker = nil;
         // Get the object name to add
         self.markBegin = self.lineStart;
         self.markEnd = @" into collection ";
-        [self findWildcardItemName];
-        self.varName = self.wildcardItemName;
+        self.varName = [self findWildcardItemName];
         
         // Find out which array or set to put it in
         if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
             self.markBegin = self.markEnd;
             self.markEnd = @". Next.\n";
-            [self findWildcardItemName];
-            self.secondVarName = self.wildcardItemName;
+            self.secondVarName = [self findWildcardItemName];
             
             // Call a method to replace on-screen text with code
             if ([self.variablesArray containsObject:self.varName] && [self.collectionsArray containsObject:self.secondVarName]) {
@@ -240,15 +238,13 @@ static SLSpeakIt *speaker = nil;
         // Get the item identifier for the loop
         self.markBegin = self.lineStart;
         self.markEnd = @" in collection ";
-        [self findWildcardItemName];
-        self.varName = self.wildcardItemName;
+        self.varName = [self findWildcardItemName];
         
         // Get the collection name
         if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
             self.markBegin = self.markEnd;
             self.markEnd = @". Next.\n";
-            [self findWildcardItemName];
-            self.secondVarName = self.wildcardItemName;
+            self.varName = [self findWildcardItemName];
             
             // Check for array existence and then replace on-screen text with code
             if ([self.collectionsArray containsObject:self.secondVarName]) {
@@ -283,15 +279,16 @@ static SLSpeakIt *speaker = nil;
             self.markBegin = self.markEnd;
             self.markEnd = @", counting ";
             self.secondVarName = [self findWildcardItemName];
-            NSLog(@"secondVarName is %@", self.secondVarName);
             
             if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
                 self.markBegin = self.markEnd;
                 self.markEnd = @". Next.\n";
                 self.incrementDirection = [self findWildcardItemName];
+                
                 [self parseForLoopVariables];
                 
                 // This may create a small bug, keep it in mind and check it later
+                // What if the last command was a warning that was not deleted?
                 if ([self.translatedCodeString rangeOfString:@"// Warning: The collection "].location == NSNotFound) {
                     self.translatedCodeString = [NSString stringWithFormat:@"for (var i = %@; i %@; %@) {\n\t\t//placeholder\n\t}", self.varName, self.secondVarName, self.incrementDirection];
                 } else {
@@ -318,8 +315,7 @@ static SLSpeakIt *speaker = nil;
     if ([self.rawInputString rangeOfString:@" condition is "].location != NSNotFound) {
         self.markBegin = self.lineStart;
         self.markEnd = @" condition is ";
-        [self findWildcardItemName];
-        self.varName = self.wildcardItemName;
+        self.varName = [self findWildcardItemName];
         
         if ([self.rawInputString rangeOfString:@" limit "].location != NSNotFound) {
             self.markBegin = self.markEnd;
@@ -364,8 +360,7 @@ static SLSpeakIt *speaker = nil;
     if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
         self.markBegin = self.lineStart;
         self.markEnd = @". Next.\n";
-        [self findWildcardItemName];
-        self.varName = self.wildcardItemName;
+        self.varName = [self findWildcardItemName];
         
         // Call a method to replace on-screen text with code
         if ([self.collectionsArray containsObject:self.varName]) {
@@ -387,8 +382,7 @@ static SLSpeakIt *speaker = nil;
         // Get the string to print
         self.markBegin = self.lineStart;
         self.markEnd = @". Next.\n";
-        [self findWildcardItemName];
-        self.varName = self.wildcardItemName;
+        self.varName = [self findWildcardItemName];
         
         // Replace on-screen text with valid code
         self.translatedCodeString = [NSString stringWithFormat:@"NSLog(@\"%@\");\n\t", self.varName];
@@ -404,15 +398,13 @@ static SLSpeakIt *speaker = nil;
         // Get the object name to remove
         self.markBegin = self.lineStart;
         self.markEnd = @" from collection ";
-        [self findWildcardItemName];
-        self.varName = self.wildcardItemName;
+        self.varName = [self findWildcardItemName];
         
         // Find out which array or set to remove it from
         if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
             self.markBegin = self.markEnd;
             self.markEnd = @". Next.\n";
-            [self findWildcardItemName];
-            self.secondVarName = self.wildcardItemName;
+            self.secondVarName = [self findWildcardItemName];
             
             // Call a method to replace on-screen text with code
             if ([self.variablesArray containsObject:self.varName] && [self.collectionsArray containsObject:self.secondVarName]) {
@@ -442,8 +434,7 @@ static SLSpeakIt *speaker = nil;
         // Find and set the array or set name
         self.markBegin = self.lineStart;
         self.markEnd = @". Next.\n";
-        [self findWildcardItemName];
-        self.varName = self.wildcardItemName;
+        self.varName = [self findWildcardItemName];
         
         // Add the collection name to the collections array
         [self.collectionsArray addObject:self.varName];
@@ -474,8 +465,7 @@ static SLSpeakIt *speaker = nil;
         // Find and set the variable name
         self.markBegin = self.lineStart;
         self.markEnd = @". Equal to ";
-        [self findWildcardItemName];
-        self.varName = self.wildcardItemName;
+        self.varName = [self findWildcardItemName];
         
         // If the variable has a value, find and set it
         if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
@@ -483,8 +473,9 @@ static SLSpeakIt *speaker = nil;
             // followed by ". Next.\n" this should be a separate case.
             self.markBegin = self.markEnd;
             self.markEnd = @". Next.\n";
-            [self findWildcardItemName];
-            self.secondVarName = self.wildcardItemName;
+            self.secondVarName = [self findWildcardItemName];
+            
+            // Add the valid variable to the variables array
             [self.variablesArray addObject:self.varName];
             
             // Call a method to replace on-screen text with code
@@ -530,7 +521,6 @@ static SLSpeakIt *speaker = nil;
 //    }
 //}
 
-
 #pragma mark - workflow methods
 
 - (void)declarationCheck
@@ -541,8 +531,7 @@ static SLSpeakIt *speaker = nil;
         // Get the variable or array name to check
         self.markBegin = self.lineStart;
         self.markEnd = @". Next.\n";
-        [self findWildcardItemName];
-        self.varName = self.wildcardItemName;
+        self.varName = [self findWildcardItemName];
         
         // Look for a matching variable or array name
         if ([self.collectionsArray containsObject:self.varName] || [self.variablesArray containsObject:self.varName]) {
@@ -588,6 +577,10 @@ static SLSpeakIt *speaker = nil;
         self.markBegin = self.translatedCodeString;
         self.markEnd = @"Undo. Next.\n";
         [self findReplacementRange];
+        // I think this line is a problem, what if there is not a match, like if
+        // placeholder is in the translatedCodeArray? Check if deletePlaceholder updates
+        // the translatedCodeArray. Also what if there is a warning left on the screen,
+        // how does it deal with this?
         [self.translatedCodeArray removeObject:[self.translatedCodeArray lastObject]];
         
         // Delete the target command and the following "Undo" command.
@@ -624,8 +617,7 @@ static SLSpeakIt *speaker = nil;
 
 - (void)findConditionLimit
 {
-    [self findWildcardItemName];
-    self.secondVarName = self.wildcardItemName;
+    self.secondVarName = [self findWildcardItemName];
     
     if ([self.variablesArray containsObject:self.varName]) {
         if ([self.secondVarName rangeOfString:@"integer "].location != NSNotFound) {
@@ -677,7 +669,7 @@ static SLSpeakIt *speaker = nil;
                 [self deletePlaceholder];
             } else {
                 NSLog(@"Could not distinguish 'YES' or 'NO'");
-            }        self.varName = self.wildcardItemName;
+            }        // self.varName = self.wildcardItemName;
 
         } else {
             NSLog(@"Loop condition limit not identified.");
