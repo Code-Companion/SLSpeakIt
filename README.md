@@ -41,8 +41,8 @@ Control flow
 + Create an if statement. If [wildcard] variable is [operator] [type] [wildcard]. Next.
 + Create an if statement. If [wildcard] [exists/does not exist]. Next.
 
-* [operator] = [not equal to/greater than or equal to/less than or equal to/equal to/greater than/less than]
-* [type] = [integer/float/double/string/bool]
+[operator] = [not equal to/greater than or equal to/less than or equal to/equal to/greater than/less than]
+[type] = [integer/float/double/string/bool]
 
 Logging
 --------
