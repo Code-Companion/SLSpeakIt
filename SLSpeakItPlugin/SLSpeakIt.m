@@ -171,25 +171,29 @@ static SLSpeakIt *speaker = nil;
     } else if ([self.rawInputString rangeOfString:@"Create a for loop from start point "].location != NSNotFound) {
         self.lineStart = @"Create a for loop from start point ";
         [self createForLoop];
+    
+    // case - create an if statement
+    } else if ([self.rawInputString rangeOfString:@"Create an if statement. If "].location != NSNotFound) {
+        self.lineStart = @"Create an if statement. If ";
+        [self createIfStatement];
+    
+    // case - create an else if statement
+    // look for previous translatedCodeString in translatedCodeArray to be an if statement
+    // if so, move the cursor to after the last if bracket and insert new code there
+    
+    // case - create an else statement
+    // look for previous translatedCodeString in translatedCodeArray to be an if or else if
+    // statement; if so, move the cursor to after the last bracket and insert new code there
         
-//    // case - create an if statement
-//    } else if ([self.rawInputString rangeOfString:@"Create an if statement"].location != NSNotFound) {
-//        self.lineStart = @"Create an if statement";
-//        [self createIfStatement];
-//        
     // Do some math operations for ints, floats, doubles, etc.
     // Add an NSNumber variable type
-    
-    // Create an if statement. Condition: x < 5 etc.
-    // Else if at close-bracket (if so, then get condition: etc.
-    // Else at close-bracket (if so, then end and replace with code
     
     // Next line -> does a newline \n
     // Previous line
     
     // Add a (void/bool/int/id/NSArray/etc.) method. Call it
     // Return functionality
-        
+    
     // default case
     } else {
         NSLog(@"No match of lineStart");
@@ -308,18 +312,17 @@ static SLSpeakIt *speaker = nil;
     }
 }
 
-- (void)createWhileLoop
+- (void)createIfStatement
 {
     // For now, varName should be a previously declared variable
-    // A warning is generated otherwise
-    if ([self.rawInputString rangeOfString:@" condition is "].location != NSNotFound) {
+    if ([self.rawInputString rangeOfString:@" variable is "].location != NSNotFound) {
         self.markBegin = self.lineStart;
-        self.markEnd = @" condition is ";
+        self.markEnd = @" variable is ";
         self.varName = [self findWildcardItemName];
         
-        if ([self.rawInputString rangeOfString:@" limit "].location != NSNotFound) {
-            self.markBegin = self.markEnd;
-            self.markEnd = @" limit ";
+        if ([self.rawInputString rangeOfString:@" condition "].location != NSNotFound) {
+            self.markBegin = self.lineStart;
+            self.markEnd = @" condition ";
             [self findConditionOperator];
             
             if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
@@ -328,7 +331,56 @@ static SLSpeakIt *speaker = nil;
                 [self findConditionLimit];
 
             } else {
-                NSLog(@"Loop condition limit not detected");
+                NSLog(@"If statement condition limit not detected.");
+            }
+        } else {
+            NSLog(@"If statement condition operator not detected.");
+        }
+        
+    } else if ([self.rawInputString rangeOfString:@" exists. Next.\n"].location != NSNotFound) {
+        self.markBegin = self.lineStart;
+        self.markEnd = @" exists. Next.\n";
+        self.varName = [self findWildcardItemName];
+        self.translatedCodeString = [NSString stringWithFormat:@"if (%@) {\n\t\t//placeholder\n\t}", self.varName];
+        [self replaceLineWithTranslatedCodeString];
+        [self deletePlaceholder];
+        
+    } else if ([self.rawInputString rangeOfString:@" does not exist. Next.\n"].location != NSNotFound) {
+        self.markBegin = self.lineStart;
+        self.markEnd = @" does not exist. Next.\n";
+        self.varName = [self findWildcardItemName];
+        self.translatedCodeString = [NSString stringWithFormat:@"if (!%@) {\n\t\t//placeholder\n\t}", self.varName];
+        [self replaceLineWithTranslatedCodeString];
+        [self deletePlaceholder];
+    
+    } else {
+        NSLog(@"If statement variable not detected");
+    }
+}
+
+- (void)createWhileLoop
+{
+    // For now, varName should be a previously declared variable
+    // A warning is generated otherwise - where is warning generated?
+    // Combine this method with createIfStatement and switch on self.lineStart for
+    // setting the translatedCodeString?
+    if ([self.rawInputString rangeOfString:@" variable is "].location != NSNotFound) {
+        self.markBegin = self.lineStart;
+        self.markEnd = @" variable is ";
+        self.varName = [self findWildcardItemName];
+        
+        if ([self.rawInputString rangeOfString:@" end point "].location != NSNotFound) {
+            self.markBegin = self.markEnd;
+            self.markEnd = @" end point ";
+            [self findConditionOperator];
+            
+            if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
+                self.markBegin = self.markEnd;
+                self.markEnd = @". Next.\n";
+                [self findConditionLimit];
+
+            } else {
+                NSLog(@"Loop condition end point not detected");
             }
         } else {
             NSLog(@"Loop condition operator not detected");
@@ -509,18 +561,6 @@ static SLSpeakIt *speaker = nil;
     }
 }
 
-//- (void)createIfStatement
-//{
-//    // Get the condition
-//    // Use loop condition thing to do this
-//    if ([self.rawInputString rangeOfString:@"Condition "].location != NSNotFound) {
-//        NSRange conditionStartRange = [self.rawInputString rangeOfString:@"Condition " options:NSBackwardsSearch];
-//        NSRange conditionEndRange = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
-//        NSUInteger conditionLength = (conditionEndRange.location) - (conditionStartRange.location+10);
-//        NSString *condition
-//    }
-//}
-
 #pragma mark - workflow methods
 
 - (void)declarationCheck
@@ -625,48 +665,88 @@ static SLSpeakIt *speaker = nil;
             self.markEnd = @". Next.\n";
             self.conditionLimit = [self findWildcardItemName];
             int variableValue = [self.conditionLimit intValue];
-            self.translatedCodeString = [NSString stringWithFormat:@"while (%@ %@ %d) {\n\t\t//placeholder\n\t}", self.varName, self.conditionOperator, variableValue];
-            [self replaceLineWithTranslatedCodeString];
-            [self deletePlaceholder];
+            if ([self.lineStart isEqualToString:@"Create a while loop. While "]) {
+                self.translatedCodeString = [NSString stringWithFormat:@"while (%@ %@ %d) {\n\t\t//placeholder\n\t}", self.varName, self.conditionOperator, variableValue];
+                [self replaceLineWithTranslatedCodeString];
+                [self deletePlaceholder];
+            } else {
+                self.translatedCodeString = [NSString stringWithFormat:@"if (%@ %@ %d) {\n\t\t//placeholder\n\t}", self.varName, self.conditionOperator, variableValue];
+                [self replaceLineWithTranslatedCodeString];
+                [self deletePlaceholder];
+            }
             
         } else if ([self.secondVarName rangeOfString:@"float "].location != NSNotFound) {
             self.markBegin = @"float ";
             self.markEnd = @". Next.\n";
             self.conditionLimit = [self findWildcardItemName];
             float variableValue = [self.conditionLimit floatValue];
-            self.translatedCodeString = [NSString stringWithFormat:@"while (%@ %@ %f) {\n\t\t//placeholder\n\t}", self.varName, self.conditionOperator, variableValue];
-            [self replaceLineWithTranslatedCodeString];
-            [self deletePlaceholder];
+            if ([self.lineStart isEqualToString:@"Create a while loop. While "]) {
+                self.translatedCodeString = [NSString stringWithFormat:@"while (%@ %@ %f) {\n\t\t//placeholder\n\t}", self.varName, self.conditionOperator, variableValue];
+                [self replaceLineWithTranslatedCodeString];
+                [self deletePlaceholder];
+            } else {
+                self.translatedCodeString = [NSString stringWithFormat:@"if (%@ %@ %f) {\n\t\t//placeholder\n\t}", self.varName, self.conditionOperator, variableValue];
+                [self replaceLineWithTranslatedCodeString];
+                [self deletePlaceholder];
+            }
             
         } else if ([self.secondVarName rangeOfString:@"double "].location != NSNotFound) {
             self.markBegin = @"double ";
             self.markEnd = @". Next.\n";
             self.conditionLimit = [self findWildcardItemName];
             double variableValue = [self.conditionLimit doubleValue];
-            self.translatedCodeString = [NSString stringWithFormat:@"while (%@ %@ %f) {\n\t\t//placeholder\n\t}", self.varName, self.conditionOperator, variableValue];
-            [self replaceLineWithTranslatedCodeString];
-            [self deletePlaceholder];
+            if ([self.lineStart isEqualToString:@"Create a while loop. While "]) {
+                self.translatedCodeString = [NSString stringWithFormat:@"while (%@ %@ %f) {\n\t\t//placeholder\n\t}", self.varName, self.conditionOperator, variableValue];
+                [self replaceLineWithTranslatedCodeString];
+                [self deletePlaceholder];
+            } else {
+                self.translatedCodeString = [NSString stringWithFormat:@"if (%@ %@ %f) {\n\t\t//placeholder\n\t}", self.varName, self.conditionOperator, variableValue];
+                [self replaceLineWithTranslatedCodeString];
+                [self deletePlaceholder];
+            }
             
         } else if ([self.secondVarName rangeOfString:@"string "].location != NSNotFound) {
             self.markBegin = @"string ";
             self.markEnd = @". Next.\n";
             self.conditionLimit = [self findWildcardItemName];
-            self.translatedCodeString = [NSString stringWithFormat:@"while (%@ isEqualToString:%@) {\n\t\t//placeholder\n\t}", self.varName, self.conditionLimit];
-            [self replaceLineWithTranslatedCodeString];
-            [self deletePlaceholder];
+            if ([self.lineStart isEqualToString:@"Create a while loop. While "] && [self.conditionOperator isEqualToString:@"equal to"]) {
+                self.translatedCodeString = [NSString stringWithFormat:@"while (%@ isEqualToString:%@) {\n\t\t//placeholder\n\t}", self.varName, self.conditionLimit];
+                [self replaceLineWithTranslatedCodeString];
+                [self deletePlaceholder];
+            } else if ([self.lineStart isEqualToString:@"Create a while loop. While "] && [self.conditionOperator isEqualToString:@"not equal to"]) {
+                self.translatedCodeString = [NSString stringWithFormat:@"while (%@ isEqualToString:%@) {\n\t\t//placeholder\n\t}", self.varName, self.conditionLimit];
+                [self replaceLineWithTranslatedCodeString];
+                [self deletePlaceholder];
+            } else if ([self.lineStart isEqualToString:@"Create an if statement. If "] && [self.conditionOperator isEqualToString:@"equal to"]) {
+                self.translatedCodeString = [NSString stringWithFormat:@"if (%@ isEqualToString:%@) {\n\t\t//placeholder\n\t}", self.varName, self.conditionLimit];
+                [self replaceLineWithTranslatedCodeString];
+                [self deletePlaceholder];
+            } else if ([self.lineStart isEqualToString:@"Create an if statement. If "] && [self.conditionOperator isEqualToString:@"not equal to"]) {
+                self.translatedCodeString = [NSString stringWithFormat:@"if (!(%@ isEqualToString:%@) {\n\t\t//placeholder\n\t}", self.varName, self.conditionLimit];
+                [self replaceLineWithTranslatedCodeString];
+                [self deletePlaceholder];
+            } else {
+                NSLog(@"Strings need 'equal to' or 'not equal to' conditionals in this program");
+            }
             
         } else if ([self.secondVarName rangeOfString:@"bool "].location != NSNotFound) {
             self.markBegin = @"bool ";
             self.markEnd = @". Next.\n";
             self.conditionLimit = [self findWildcardItemName];
-            if ([self.conditionLimit isEqualToString:@"yes"]) {
+            if ([self.lineStart isEqualToString:@"Create a while loop. While "] && [self.conditionLimit isEqualToString:@"yes"]) {
                 self.translatedCodeString = [NSString stringWithFormat:@"while (%@ %@ YES) {\n\t\t//placeholder\n\t}", self.varName, self.conditionOperator];
                 [self replaceLineWithTranslatedCodeString];
                 [self deletePlaceholder];
-            } else if ([self.conditionLimit isEqualToString:@"no"]) {
+            } else if ([self.lineStart isEqualToString:@"Create a while loop. While "] && [self.conditionLimit isEqualToString:@"no"]) {
                 self.translatedCodeString = [NSString stringWithFormat:@"while (%@ %@ NO) {\n\t\t//placeholder\n\t}", self.varName, self.conditionOperator];
                 [self replaceLineWithTranslatedCodeString];
                 [self deletePlaceholder];
+            } else if ([self.lineStart isEqualToString:@"Create an if statement. If "] && [self.conditionLimit isEqualToString:@"yes"]) {
+                self.translatedCodeString = [NSString stringWithFormat:@"if (%@ %@ YES) {\n\t\t//placeholder\n\t}", self.varName, self.conditionOperator];
+                [self replaceLineWithTranslatedCodeString];
+                [self deletePlaceholder];
+            } else if ([self.lineStart isEqualToString:@"Create an if statement. If "] && [self.conditionLimit isEqualToString:@"no"]) {
+                self.translatedCodeString = [NSString stringWithFormat:@"if (%@ %@ NO) {\n\t\t//placeholder\n\t}", self.varName, self.conditionOperator];
             } else {
                 NSLog(@"Could not distinguish 'YES' or 'NO'");
             }        // self.varName = self.wildcardItemName;
