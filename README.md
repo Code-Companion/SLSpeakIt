@@ -36,8 +36,13 @@ Control flow
 -------------
 + Create a fast enumeration loop. For [wildcard] in collection [wildcard]. Next.
 + Create a for loop from start point [wildcard] to end point [wildcard], counting [up/down]. Next.
-+ Create a while loop. While [wildcard] condition is [not equal to/less than or equal to/greater than or equal to/equal to/less than/greater than] limit [type] [wildcard]. Next. (Interim syntax, will change.)
++ Create a while loop. While [wildcard] variable is [operator] end point [type] [wildcard]. Next. 
 + Create a while loop. While [wildcard] [exists/does not exist]. Next.
++ Create an if statement. If [wildcard] variable is [operator] [type] [wildcard]. Next.
++ Create an if statement. If [wildcard] [exists/does not exist]. Next.
+
+* [operator] = [not equal to/greater than or equal to/less than or equal to/equal to/greater than/less than]
+* [type] = [integer/float/double/string/bool]
 
 Logging
 --------

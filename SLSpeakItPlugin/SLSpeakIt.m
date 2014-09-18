@@ -294,7 +294,7 @@ static SLSpeakIt *speaker = nil;
                 // This may create a small bug, keep it in mind and check it later
                 // What if the last command was a warning that was not deleted?
                 if ([self.translatedCodeString rangeOfString:@"// Warning: The collection "].location == NSNotFound) {
-                    self.translatedCodeString = [NSString stringWithFormat:@"for (var i = %@; i %@; %@) {\n\t\t//placeholder\n\t}", self.varName, self.secondVarName, self.incrementDirection];
+                    self.translatedCodeString = [NSString stringWithFormat:@"for (int i = %@; i %@; %@) {\n\t\t//placeholder\n\t}", self.varName, self.secondVarName, self.incrementDirection];
                 } else {
                     NSLog(@"The collection referenced in the end point does not exist yet. Please create it before creating the loop.");
                 }
@@ -815,14 +815,13 @@ static SLSpeakIt *speaker = nil;
                 self.translatedCodeString = [NSString stringWithFormat:@"// Warning: The collection %@ does not exist yet.\n\t", self.secondVarName];
                 NSLog(@"translatedCodeString is %@", self.translatedCodeString);
             }
-        // It tacks on "inclusive" here, fix this later
         } else if ([self.secondVarName rangeOfString:@", inclusive"].location != NSNotFound) {
+            self.secondVarName = [self.secondVarName substringToIndex:[self.secondVarName length] - 11];
             self.secondVarName = [NSString stringWithFormat:@"<= %@", self.secondVarName];
         } else {
             self.secondVarName = [NSString stringWithFormat:@"< %@", self.secondVarName];
         }
     } else if ([self.incrementDirection isEqualToString:@"down"]) {
-        // It tacks on "inclusive" here, fix this later
         if ([self.secondVarName rangeOfString:@" count"].location != NSNotFound) {
             self.secondVarName = [self.secondVarName substringToIndex:[self.secondVarName length] - 6];
             if ([self.collectionsArray containsObject:self.secondVarName]) {
@@ -832,6 +831,7 @@ static SLSpeakIt *speaker = nil;
                 NSLog(@"translatedCodeString is %@", self.translatedCodeString);
             }
         } else if ([self.secondVarName rangeOfString:@", inclusive"].location != NSNotFound) {
+            self.secondVarName = [self.secondVarName substringToIndex:[self.secondVarName length] - 11];
             self.secondVarName = [NSString stringWithFormat:@">= %@", self.secondVarName];
         } else {
             self.secondVarName = [NSString stringWithFormat:@"> %@", self.secondVarName];
