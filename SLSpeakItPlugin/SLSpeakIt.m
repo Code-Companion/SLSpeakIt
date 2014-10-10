@@ -178,13 +178,23 @@ static SLSpeakIt *speaker = nil;
         [self createIfStatement];
     
     // case - create an else if statement
-    // look for previous translatedCodeString in translatedCodeArray to be an if statement
-    // if so, move the cursor to after the last if bracket and insert new code there
+    } else if ([self.rawInputString rangeOfString:@"Create an else if statement. Else if "].location != NSNotFound) {
+        if ([self.lineStart isEqualToString:@"Create an if statement. If "]) {
+            self.lineStart = @"Create an else if statement. Else if ";
+            [self createIfStatement];
+        }
     
     // case - create an else statement
-    // look for previous translatedCodeString in translatedCodeArray to be an if or else if
-    // statement; if so, move the cursor to after the last bracket and insert new code there
+    } else if ([self.rawInputString rangeOfString:@"Create an else statement. Else "].location != NSNotFound) {
+        if ([self.lineStart isEqualToString:@"Create an if statement. If "] || [self.lineStart isEqualToString:@"Create an else if statement. Else if "]) {
+            self.lineStart = @"Create an else statement. Else ";
+            [self createIfStatement];
+        }
         
+    //
+    // For else if and if statements,
+    // move the cursor to after the last if bracket and insert new code there
+    
     // Do some math operations for ints, floats, doubles, etc.
     // Add an NSNumber variable type
     
@@ -256,8 +266,6 @@ static SLSpeakIt *speaker = nil;
                 [self.variablesArray addObject:self.varName];
                 self.translatedCodeString = [NSString stringWithFormat:@"for (id %@ in %@) {\n\t\t//placeholder\n\t}", self.varName, self.secondVarName];
                 [self replaceLineWithTranslatedCodeString];
-                // This is extremely hacky and will be replaced at some point, but it works for
-                // right now, except when undo is used. This needs to be fixed.
                 [self deletePlaceholder];
             } else {
                 self.translatedCodeString = [NSString stringWithFormat:@"// Warning: The variable %@ or the collection %@ does not exist yet.\n\t", self.varName, self.secondVarName];
@@ -312,6 +320,9 @@ static SLSpeakIt *speaker = nil;
     }
 }
 
+// Else and Else If are basically the same as If; once If is finalized, have Else If and Else
+// call this same method and change the translatedCodeString based on self.lineStart.
+// This is also basically the same as the createWhileLoop; can they be combined?
 - (void)createIfStatement
 {
     // For now, varName should be a previously declared variable
@@ -320,8 +331,11 @@ static SLSpeakIt *speaker = nil;
         self.markEnd = @" variable is ";
         self.varName = [self findWildcardItemName];
         
+        // Change this to match the type, not "condition" so integer or float or double
+        // or string or bool
         if ([self.rawInputString rangeOfString:@" condition "].location != NSNotFound) {
-            self.markBegin = self.lineStart;
+            // double-check this, does it work? I think self.markBegin = self.markEnd is right
+            self.markBegin = self.markEnd;
             self.markEnd = @" condition ";
             [self findConditionOperator];
             
@@ -341,6 +355,7 @@ static SLSpeakIt *speaker = nil;
         self.markBegin = self.lineStart;
         self.markEnd = @" exists. Next.\n";
         self.varName = [self findWildcardItemName];
+        // switch here on self.lineStart for if / else if / else
         self.translatedCodeString = [NSString stringWithFormat:@"if (%@) {\n\t\t//placeholder\n\t}", self.varName];
         [self replaceLineWithTranslatedCodeString];
         [self deletePlaceholder];
@@ -349,6 +364,7 @@ static SLSpeakIt *speaker = nil;
         self.markBegin = self.lineStart;
         self.markEnd = @" does not exist. Next.\n";
         self.varName = [self findWildcardItemName];
+        // switch here on self.lineStart for if / else if / else
         self.translatedCodeString = [NSString stringWithFormat:@"if (!%@) {\n\t\t//placeholder\n\t}", self.varName];
         [self replaceLineWithTranslatedCodeString];
         [self deletePlaceholder];
@@ -655,6 +671,7 @@ static SLSpeakIt *speaker = nil;
     }
 }
 
+// This is where to customize self.translatedCodeString for else if and else statements
 - (void)findConditionLimit
 {
     self.secondVarName = [self findWildcardItemName];
@@ -665,12 +682,23 @@ static SLSpeakIt *speaker = nil;
             self.markEnd = @". Next.\n";
             self.conditionLimit = [self findWildcardItemName];
             int variableValue = [self.conditionLimit intValue];
+            // Can this kind of stuff be abstracted away somewhere? Maybe set while /
+            // if / else if / else as options and then insert them with a flag with one
+            // statement to set the translatedCodeString
             if ([self.lineStart isEqualToString:@"Create a while loop. While "]) {
                 self.translatedCodeString = [NSString stringWithFormat:@"while (%@ %@ %d) {\n\t\t//placeholder\n\t}", self.varName, self.conditionOperator, variableValue];
                 [self replaceLineWithTranslatedCodeString];
                 [self deletePlaceholder];
-            } else {
+            } else if ([self.lineStart isEqualToString:@"Create an if statement. If "]) {
                 self.translatedCodeString = [NSString stringWithFormat:@"if (%@ %@ %d) {\n\t\t//placeholder\n\t}", self.varName, self.conditionOperator, variableValue];
+                [self replaceLineWithTranslatedCodeString];
+                [self deletePlaceholder];
+            } else if ([self.lineStart isEqualToString:@"Create an else if statement. Else if "]) {
+                self.translatedCodeString = [NSString stringWithFormat:@"else if (%@ %@ %d) {\n\t\t//placeholder\n\t}", self.varName, self.conditionOperator, variableValue];
+                [self replaceLineWithTranslatedCodeString];
+                [self deletePlaceholder];
+            } else {
+                self.translatedCodeString = [NSString stringWithFormat:@"else (%@ %@ %d) {\n\t\t//placeholder\n\t}", self.varName, self.conditionOperator, variableValue];
                 [self replaceLineWithTranslatedCodeString];
                 [self deletePlaceholder];
             }
