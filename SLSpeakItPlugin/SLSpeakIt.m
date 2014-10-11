@@ -323,6 +323,9 @@ static SLSpeakIt *speaker = nil;
 // Else and Else If are basically the same as If; once If is finalized, have Else If and Else
 // call this same method and change the translatedCodeString based on self.lineStart.
 // This is also basically the same as the createWhileLoop; can they be combined?
+// Also, an else statement probably needs to be different because there is NO conditional
+// specified. Just else. So a generic block of code should do it that is a separate method.
+// If and else if and possibly while can be handled here.
 - (void)createIfStatement
 {
     // For now, varName should be a previously declared variable
@@ -334,7 +337,6 @@ static SLSpeakIt *speaker = nil;
         // Change this to match the type, not "condition" so integer or float or double
         // or string or bool
         if ([self.rawInputString rangeOfString:@" condition "].location != NSNotFound) {
-            // double-check this, does it work? I think self.markBegin = self.markEnd is right
             self.markBegin = self.markEnd;
             self.markEnd = @" condition ";
             [self findConditionOperator];
@@ -355,19 +357,35 @@ static SLSpeakIt *speaker = nil;
         self.markBegin = self.lineStart;
         self.markEnd = @" exists. Next.\n";
         self.varName = [self findWildcardItemName];
-        // switch here on self.lineStart for if / else if / else
-        self.translatedCodeString = [NSString stringWithFormat:@"if (%@) {\n\t\t//placeholder\n\t}", self.varName];
-        [self replaceLineWithTranslatedCodeString];
-        [self deletePlaceholder];
+        if ([self.lineStart isEqualToString:@"Create an if statement. If "]) {
+            self.translatedCodeString = [NSString stringWithFormat:@"if (%@) {\n\t\t//placeholder\n\t}", self.varName];
+            [self replaceLineWithTranslatedCodeString];
+            [self deletePlaceholder];
+        } else if ([self.lineStart isEqualToString:@"Create an else if statement. Else if "]) {
+            self.translatedCodeString = [NSString stringWithFormat:@"else if (%@) {\n\t\t//placeholder\n\t}", self.varName];
+            [self replaceLineWithTranslatedCodeString];
+            [self deletePlaceholder];
+        } else {
+            // I don't think an else statement ever checks a condition. Leaving it out.
+            NSLog(@"Else statements do not check a condition.");
+        }
         
     } else if ([self.rawInputString rangeOfString:@" does not exist. Next.\n"].location != NSNotFound) {
         self.markBegin = self.lineStart;
         self.markEnd = @" does not exist. Next.\n";
         self.varName = [self findWildcardItemName];
-        // switch here on self.lineStart for if / else if / else
-        self.translatedCodeString = [NSString stringWithFormat:@"if (!%@) {\n\t\t//placeholder\n\t}", self.varName];
-        [self replaceLineWithTranslatedCodeString];
-        [self deletePlaceholder];
+        if ([self.lineStart isEqualToString:@"Create an if statement. If "]) {
+            self.translatedCodeString = [NSString stringWithFormat:@"if (!%@) {\n\t\t//placeholder\n\t}", self.varName];
+            [self replaceLineWithTranslatedCodeString];
+            [self deletePlaceholder];
+        } else if ([self.lineStart isEqualToString:@"Create an else if statement. Else if "]) {
+            self.translatedCodeString = [NSString stringWithFormat:@"else if (!%@) {\n\t\t//placeholder\n\t}", self.varName];
+            [self replaceLineWithTranslatedCodeString];
+            [self deletePlaceholder];
+        } else {
+            // I don't think an else statement ever checks a condition. Leaving it out.
+            NSLog(@"Else statements do not check a condition.");
+        }
     
     } else {
         NSLog(@"If statement variable not detected");
