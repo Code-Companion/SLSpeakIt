@@ -324,7 +324,7 @@ static SLSpeakIt *speaker = nil;
     }
 }
 
-// This is also basically the same as the createWhileLoop; can they be combined?
+// Combine this with the createWhileLoop and rename as createConditionalStatement
 - (void)createIfStatement
 {
     // For now, varName should be a previously declared variable
@@ -333,24 +333,18 @@ static SLSpeakIt *speaker = nil;
         self.markEnd = @" variable is ";
         self.varName = [self findWildcardItemName];
         
-        // Change this to match the type, not "condition" so integer or float or double
-        // or string or bool
-        if ([self.rawInputString rangeOfString:@" condition "].location != NSNotFound) {
-            self.markBegin = self.markEnd;
-            self.markEnd = @" condition ";
-            [self findConditionOperator];
-            
+        // Find the condition operator
+        [self findConditionOperator];
+        
+            // Find the condition limit
             if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
-                self.markBegin = self.markEnd;
+                self.markBegin = self.conditionOperator;
                 self.markEnd = @". Next.\n";
                 [self findConditionLimit];
 
             } else {
-                NSLog(@"If statement condition limit not detected.");
+                NSLog(@"Condition limit not detected.");
             }
-        } else {
-            NSLog(@"If statement condition operator not detected.");
-        }
         
     } else if ([self.rawInputString rangeOfString:@" exists. Next.\n"].location != NSNotFound) {
         self.markBegin = self.lineStart;
