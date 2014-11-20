@@ -84,107 +84,107 @@ static SLSpeakIt *speaker = nil;
         [self setVariableNameAndValue];
     
     // case - create a float variable
-    } else if ([self.rawInputString rangeOfString:@"Create a float variable. Call it "].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"Create a float variable. Call it " options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.lineStart = @"Create a float variable. Call it ";
         [self setVariableNameAndValue];
     
     // case - create a double variable
-    } else if ([self.rawInputString rangeOfString:@"Create a double variable. Call it "].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"Create a double variable. Call it " options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.lineStart = @"Create a double variable. Call it ";
         [self setVariableNameAndValue];
         
     // case - create a string variable
-    } else if ([self.rawInputString rangeOfString:@"Create a string variable. Call it "].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"Create a string variable. Call it " options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.lineStart = @"Create a string variable. Call it ";
         [self setVariableNameAndValue];
     
     // case - create an unsigned integer NSUInteger variable
-    } else if ([self.rawInputString rangeOfString:@"Create an unsigned integer variable. Call it "].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"Create an unsigned integer variable. Call it " options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.lineStart = @"Create an unsigned integer variable. Call it ";
         [self setVariableNameAndValue];
     
     // case - create an array
-    } else if ([self.rawInputString rangeOfString:@"Create an array. Call it "].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"Create an array. Call it " options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.lineStart = @"Create an array. Call it ";
         [self setArrayOrSetName];
         
     // case - create a mutable array
-    } else if ([self.rawInputString rangeOfString:@"Create a mutable array. Call it "].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"Create a mutable array. Call it " options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.lineStart = @"Create a mutable array. Call it ";
         [self setArrayOrSetName];
         
     // case - create a set
-    } else if ([self.rawInputString rangeOfString:@"Create a set. Call it "].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"Create a set. Call it " options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.lineStart = @"Create a set. Call it ";
         [self setArrayOrSetName];
     
     // case - create a mutable set
-    } else if ([self.rawInputString rangeOfString:@"Create a mutable set. Call it "].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"Create a mutable set. Call it " options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.lineStart = @"Create a mutable set. Call it ";
         [self setArrayOrSetName];
         
     // case - add to array or set
-    } else if ([self.rawInputString rangeOfString:@"Put "].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"Put " options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.lineStart = @"Put ";
         [self addToArrayOrSet];
         
     // case - remove from array or set
-    } else if ([self.rawInputString rangeOfString:@"Remove "].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"Remove " options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.lineStart = @"Remove ";
         [self removeFromArrayOrSet];
 
     // case - get random object from array or set
-    } else if ([self.rawInputString rangeOfString:@"Random item from collection "].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"Random item from collection " options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.lineStart = @"Random item from collection ";
         [self getRandomFromArrayOrSet];
         
     // case - log to console
-    } else if ([self.rawInputString rangeOfString:@"Print "].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"Print " options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.lineStart = @"Print ";
         [self logToConsole];
     
     // case - check if variable or collection was declared
-    } else if ([self.rawInputString rangeOfString:@"Did I declare "].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"Did I declare " options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.lineStart = @"Did I declare ";
         [self declarationCheck];
         
     // case - delete warning
-    } else if ([self.rawInputString rangeOfString:@"Delete warning"].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"Delete warning" options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.lineStart = @"Delete warning";
         [self deleteWarning];
         
     // case - create a fast enumeration loop
-    } else if ([self.rawInputString rangeOfString:@"Create a fast enumeration loop. For "].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"Create a fast enumeration loop. For " options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.lineStart = @"Create a fast enumeration loop. For ";
         [self createFastEnumerationLoop];
     
     // case - undo last command
-    } else if ([self.rawInputString rangeOfString:@"Undo"].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"Undo" options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.lineStart = @"Undo";
         [self undoLastCommand];
         
     // case - create a while loop
-    } else if ([self.rawInputString rangeOfString:@"Create a while loop. While "].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"Create a while loop. While " options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.lineStart = @"Create a while loop. While ";
         [self createConditionalStatement];
     
     // case - create a for loop
-    } else if ([self.rawInputString rangeOfString:@"Create a for loop from start point "].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"Create a for loop from start point " options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.lineStart = @"Create a for loop from start point ";
         [self createForLoop];
     
     // case - create an if statement
-    } else if ([self.rawInputString rangeOfString:@"Create an if statement. If "].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"Create an if statement. If " options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.lineStart = @"Create an if statement. If ";
         [self createConditionalStatement];
     
     // case - create an else if statement
-    } else if ([self.rawInputString rangeOfString:@"Create an else if statement. Else if "].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"Create an else if statement. Else if " options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.lineStart = @"Create an else if statement. Else if ";
         [self createConditionalStatement];
     
     // case - create an else statement
-    } else if ([self.rawInputString rangeOfString:@"Create an else statement"].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"Create an else statement" options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.lineStart = @"Create an else statement";
         [self createElseStatement];
         
@@ -214,16 +214,17 @@ static SLSpeakIt *speaker = nil;
 
 - (void)addToArrayOrSet
 {
-    if ([self.rawInputString rangeOfString:@" into collection "].location != NSNotFound) {
+    if ([self.rawInputString rangeOfString:@" into collection " options:NSCaseInsensitiveSearch].location != NSNotFound) {
         // Get the object name to add
+        self.varEqual = @" into collection ";
         self.markBegin = self.lineStart;
-        self.markEnd = @" into collection ";
+        self.markEnd = self.varEqual;
         self.varName = [self findWildcardItemName];
         
         // Find out which array or set to put it in
-        if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
+        if ([self.rawInputString rangeOfString:@". Next.\n" options:NSCaseInsensitiveSearch].location != NSNotFound) {
             self.markBegin = self.markEnd;
-            self.markEnd = @". Next.\n";
+            self.markEnd = self.lineEnd;
             self.secondVarName = [self findWildcardItemName];
             
             // Call a method to replace on-screen text with code
@@ -244,16 +245,17 @@ static SLSpeakIt *speaker = nil;
 
 - (void)createFastEnumerationLoop
 {
-    if ([self.rawInputString rangeOfString:@" in collection "].location != NSNotFound) {
+    if ([self.rawInputString rangeOfString:@" in collection " options:NSCaseInsensitiveSearch].location != NSNotFound) {
         // Get the item identifier for the loop
+        self.varEqual = @" in collection ";
         self.markBegin = self.lineStart;
-        self.markEnd = @" in collection ";
+        self.markEnd = self.varEqual;
         self.varName = [self findWildcardItemName];
         
         // Get the collection name
-        if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
+        if ([self.rawInputString rangeOfString:@". Next.\n" options:NSCaseInsensitiveSearch].location != NSNotFound) {
             self.markBegin = self.markEnd;
-            self.markEnd = @". Next.\n";
+            self.markEnd = self.lineEnd;
             self.varName = [self findWildcardItemName];
             
             // Check for array existence and then replace on-screen text with code
@@ -277,7 +279,7 @@ static SLSpeakIt *speaker = nil;
 
 - (void)createElseStatement
 {
-    if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
+    if ([self.rawInputString rangeOfString:@". Next.\n" options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.translatedCodeString = [NSString stringWithFormat:@"else {\n\t\t//placeholder\n\t}"];
         [self replaceLineWithTranslatedCodeString];
         [self deletePlaceholder];
@@ -287,19 +289,21 @@ static SLSpeakIt *speaker = nil;
 - (void)createForLoop
 {
     // This method creates a for loop with certain bounds. For now, it uses a generic variable 'i'
-    if ([self.rawInputString rangeOfString:@" to end point "].location != NSNotFound) {
+    if ([self.rawInputString rangeOfString:@" to end point " options:NSCaseInsensitiveSearch].location != NSNotFound) {
+        self.varEqual = @" to end point ";
         self.markBegin = self.lineStart;
-        self.markEnd = @" to end point ";
+        self.markEnd = self.varEqual;
         self.varName = [self findWildcardItemName];
         
-        if ([self.rawInputString rangeOfString:@", counting "].location != NSNotFound) {
+        if ([self.rawInputString rangeOfString:@", counting " options:NSCaseInsensitiveSearch].location != NSNotFound) {
+            self.varEqual = @", counting ";
             self.markBegin = self.markEnd;
-            self.markEnd = @", counting ";
+            self.markEnd = self.varEqual;
             self.secondVarName = [self findWildcardItemName];
             
-            if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
+            if ([self.rawInputString rangeOfString:@". Next.\n" options:NSCaseInsensitiveSearch].location != NSNotFound) {
                 self.markBegin = self.markEnd;
-                self.markEnd = @". Next.\n";
+                self.markEnd = self.lineEnd;
                 self.incrementDirection = [self findWildcardItemName];
                 
                 [self parseForLoopVariables];
@@ -328,27 +332,29 @@ static SLSpeakIt *speaker = nil;
 - (void)createConditionalStatement
 {
     // For now, varName should be a previously declared variable
-    if ([self.rawInputString rangeOfString:@" variable is "].location != NSNotFound) {
+    if ([self.rawInputString rangeOfString:@" variable is " options:NSCaseInsensitiveSearch].location != NSNotFound) {
+        self.varEqual = @" variable is ";
         self.markBegin = self.lineStart;
-        self.markEnd = @" variable is ";
+        self.markEnd = self.varEqual;
         self.varName = [self findWildcardItemName];
         
         // Find the condition operator
         [self findConditionOperator];
         
             // Find the condition limit
-            if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
+        if ([self.rawInputString rangeOfString:@". Next.\n" options:NSCaseInsensitiveSearch].location != NSNotFound) {
                 self.markBegin = self.conditionOperator;
-                self.markEnd = @". Next.\n";
+                self.markEnd = self.lineEnd;
                 [self findConditionLimit];
 
             } else {
                 NSLog(@"Condition limit not detected.");
             }
         
-    } else if ([self.rawInputString rangeOfString:@" exists. Next.\n"].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@" exists. Next.\n" options:NSCaseInsensitiveSearch].location != NSNotFound) {
+        self.varEqual = @" exists. Next.\n";
         self.markBegin = self.lineStart;
-        self.markEnd = @" exists. Next.\n";
+        self.markEnd = self.varEqual;
         self.varName = [self findWildcardItemName];
         if ([self.lineStart isEqualToString:@"Create an if statement. If "]) {
             self.translatedCodeString = [NSString stringWithFormat:@"if (%@) {\n\t\t//placeholder\n\t}", self.varName];
@@ -367,9 +373,10 @@ static SLSpeakIt *speaker = nil;
             NSLog(@"Else statements do not check a condition.");
         }
         
-    } else if ([self.rawInputString rangeOfString:@" does not exist. Next.\n"].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@" does not exist. Next.\n" options:NSCaseInsensitiveSearch].location != NSNotFound) {
+        self.varEqual = @" does not exist. Next.\n";
         self.markBegin = self.lineStart;
-        self.markEnd = @" does not exist. Next.\n";
+        self.markEnd = self.varEqual;
         self.varName = [self findWildcardItemName];
         if ([self.lineStart isEqualToString:@"Create an if statement. If "]) {
             self.translatedCodeString = [NSString stringWithFormat:@"if (!%@) {\n\t\t//placeholder\n\t}", self.varName];
@@ -396,9 +403,9 @@ static SLSpeakIt *speaker = nil;
 
 - (void)getRandomFromArrayOrSet
 {
-    if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
+    if ([self.rawInputString rangeOfString:@". Next.\n" options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.markBegin = self.lineStart;
-        self.markEnd = @". Next.\n";
+        self.markEnd = self.lineEnd;
         self.varName = [self findWildcardItemName];
         
         // Call a method to replace on-screen text with code
@@ -417,10 +424,10 @@ static SLSpeakIt *speaker = nil;
 
 - (void)logToConsole
 {
-    if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
+    if ([self.rawInputString rangeOfString:@". Next.\n" options:NSCaseInsensitiveSearch].location != NSNotFound) {
         // Get the string to print
         self.markBegin = self.lineStart;
-        self.markEnd = @". Next.\n";
+        self.markEnd = self.lineEnd;
         self.varName = [self findWildcardItemName];
         
         // Replace on-screen text with valid code
@@ -433,16 +440,17 @@ static SLSpeakIt *speaker = nil;
 
 - (void)removeFromArrayOrSet
 {
-    if ([self.rawInputString rangeOfString:@" from collection "].location != NSNotFound) {
+    if ([self.rawInputString rangeOfString:@" from collection " options:NSCaseInsensitiveSearch].location != NSNotFound) {
         // Get the object name to remove
+        self.varEqual = @" from collection ";
         self.markBegin = self.lineStart;
-        self.markEnd = @" from collection ";
+        self.markEnd = self.varEqual;
         self.varName = [self findWildcardItemName];
         
         // Find out which array or set to remove it from
-        if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
+        if ([self.rawInputString rangeOfString:@". Next.\n" options:NSCaseInsensitiveSearch].location != NSNotFound) {
             self.markBegin = self.markEnd;
-            self.markEnd = @". Next.\n";
+            self.markEnd = self.lineEnd;
             self.secondVarName = [self findWildcardItemName];
             
             // Call a method to replace on-screen text with code
@@ -468,11 +476,11 @@ static SLSpeakIt *speaker = nil;
 
 - (void)setArrayOrSetName
 {
-    if ([self.rawInputString rangeOfString:@". Next."].location != NSNotFound) {
+    if ([self.rawInputString rangeOfString:@". Next.\n" options:NSCaseInsensitiveSearch].location != NSNotFound) {
         
         // Find and set the array or set name
         self.markBegin = self.lineStart;
-        self.markEnd = @". Next.\n";
+        self.markEnd = self.lineEnd;
         self.varName = [self findWildcardItemName];
         
         // Add the collection name to the collections array
@@ -555,12 +563,12 @@ static SLSpeakIt *speaker = nil;
 
 - (void)declarationCheck
 {
-    if ([self.rawInputString rangeOfString:@". Next.\n"].location == NSNotFound) {
+    if ([self.rawInputString rangeOfString:@". Next.\n" options:NSCaseInsensitiveSearch].location == NSNotFound) {
         NSLog(@"Variable or collection to check not identified");
     } else {
         // Get the variable or array name to check
         self.markBegin = self.lineStart;
-        self.markEnd = @". Next.\n";
+        self.markEnd = self.lineEnd;
         self.varName = [self findWildcardItemName];
         
         // Look for a matching variable or array name
@@ -576,9 +584,11 @@ static SLSpeakIt *speaker = nil;
 
 - (void)deleteWarning
 {
-    if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
+    if ([self.rawInputString rangeOfString:@". Next.\n" options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.markBegin = @"// Warning: ";
-        self.markEnd = @" warning. Next.\n";
+        // do some string concatenation here? " warning" + self.lineEnd?
+        self.markEnd = self.lineEnd;
+        // self.markEnd = @" warning. Next.\n";
         [self findReplacementRange];
 
         // Delete the warning and the following "Delete warning" command.
@@ -602,10 +612,11 @@ static SLSpeakIt *speaker = nil;
     // Undo is buggy if the user has deleted text with the mouse and then re-inserted it
     // Also within a for loop if any "Undo" commands are issued. Undo needs to be much more
     // robust.
-    if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
+    if ([self.rawInputString rangeOfString:@". Next.\n" options:NSCaseInsensitiveSearch].location != NSNotFound) {
         // Find the replacement range.
         self.markBegin = self.translatedCodeString;
-        self.markEnd = @"Undo. Next.\n";
+        self.markEnd = self.lineEnd;
+        // self.markEnd = @"Undo. Next.\n";
         [self findReplacementRange];
         // I think this line is a problem, what if there is not a match, like if
         // placeholder is in the translatedCodeArray? Check if deletePlaceholder updates
@@ -650,9 +661,10 @@ static SLSpeakIt *speaker = nil;
     self.secondVarName = [self findWildcardItemName];
     
     if ([self.variablesArray containsObject:self.varName]) {
-        if ([self.secondVarName rangeOfString:@"integer "].location != NSNotFound) {
-            self.markBegin = @"integer ";
-            self.markEnd = @". Next.\n";
+        if ([self.secondVarName rangeOfString:@"integer " options:NSCaseInsensitiveSearch].location != NSNotFound) {
+            self.varEqual = @"integer ";
+            self.markBegin = self.varEqual;
+            self.markEnd = self.lineEnd;
             self.conditionLimit = [self findWildcardItemName];
             int variableValue = [self.conditionLimit intValue];
             // Can this kind of stuff be abstracted away somewhere? Maybe set while /
@@ -672,9 +684,10 @@ static SLSpeakIt *speaker = nil;
                 [self deletePlaceholder];
             }
             
-        } else if ([self.secondVarName rangeOfString:@"float "].location != NSNotFound) {
-            self.markBegin = @"float ";
-            self.markEnd = @". Next.\n";
+        } else if ([self.secondVarName rangeOfString:@"float " options:NSCaseInsensitiveSearch].location != NSNotFound) {
+            self.varEqual = @"float ";
+            self.markBegin = self.varEqual;
+            self.markEnd = self.lineEnd;
             self.conditionLimit = [self findWildcardItemName];
             float variableValue = [self.conditionLimit floatValue];
             if ([self.lineStart isEqualToString:@"Create a while loop. While "]) {
@@ -691,9 +704,10 @@ static SLSpeakIt *speaker = nil;
                 [self deletePlaceholder];
             }
             
-        } else if ([self.secondVarName rangeOfString:@"double "].location != NSNotFound) {
-            self.markBegin = @"double ";
-            self.markEnd = @". Next.\n";
+        } else if ([self.secondVarName rangeOfString:@"double " options:NSCaseInsensitiveSearch].location != NSNotFound) {
+            self.varEqual = @"double ";
+            self.markBegin = self.varEqual;
+            self.markEnd = self.lineEnd;
             self.conditionLimit = [self findWildcardItemName];
             double variableValue = [self.conditionLimit doubleValue];
             if ([self.lineStart isEqualToString:@"Create a while loop. While "]) {
@@ -710,10 +724,13 @@ static SLSpeakIt *speaker = nil;
                 [self deletePlaceholder];
             }
             
-        } else if ([self.secondVarName rangeOfString:@"string "].location != NSNotFound) {
-            self.markBegin = @"string ";
-            self.markEnd = @". Next.\n";
+        } else if ([self.secondVarName rangeOfString:@"string " options:NSCaseInsensitiveSearch].location != NSNotFound) {
+            self.varEqual = @"string ";
+            self.markBegin = self.varEqual;
+            self.markEnd = self.lineEnd;
             self.conditionLimit = [self findWildcardItemName];
+            // I think this is not right, the self.conditionOperator is == or != so check this
+            // should it be conditionLimit in the check instead?
             if ([self.lineStart isEqualToString:@"Create a while loop. While "] && [self.conditionOperator isEqualToString:@"equal to"]) {
                 self.translatedCodeString = [NSString stringWithFormat:@"while (%@ isEqualToString:%@) {\n\t\t//placeholder\n\t}", self.varName, self.conditionLimit];
                 [self replaceLineWithTranslatedCodeString];
@@ -742,9 +759,10 @@ static SLSpeakIt *speaker = nil;
                 NSLog(@"Strings need 'equal to' or 'not equal to' conditionals in this program");
             }
             
-        } else if ([self.secondVarName rangeOfString:@"bool "].location != NSNotFound) {
-            self.markBegin = @"bool ";
-            self.markEnd = @". Next.\n";
+        } else if ([self.secondVarName rangeOfString:@"bool " options:NSCaseInsensitiveSearch].location != NSNotFound) {
+            self.varEqual = @"bool ";
+            self.markBegin = self.varEqual;
+            self.markEnd = self.lineEnd;
             self.conditionLimit = [self findWildcardItemName];
             if ([self.lineStart isEqualToString:@"Create a while loop. While "] && [self.conditionLimit isEqualToString:@"yes"]) {
                 self.translatedCodeString = [NSString stringWithFormat:@"while (%@ %@ YES) {\n\t\t//placeholder\n\t}", self.varName, self.conditionOperator];
@@ -769,7 +787,7 @@ static SLSpeakIt *speaker = nil;
                 [self replaceLineWithTranslatedCodeString];
                 [self deletePlaceholder];
             } else {
-                NSLog(@"Could not distinguish 'YES' or 'NO'");
+                NSLog(@"Could not distinguish 'yes' or 'no'");
             }        // self.varName = self.wildcardItemName;
 
         } else {
@@ -785,17 +803,17 @@ static SLSpeakIt *speaker = nil;
 - (void)findConditionOperator
 {
     // This method finds the operator within a loop or if-else conditional
-    if ([self.rawInputString rangeOfString:@"not equal to"].location != NSNotFound) {
+    if ([self.rawInputString rangeOfString:@"not equal to" options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.conditionOperator = @"!=";
-    } else if ([self.rawInputString rangeOfString:@"less than or equal to"].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"less than or equal to" options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.conditionOperator = @"<=";
-    } else if ([self.rawInputString rangeOfString:@"greater than or equal to"].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"greater than or equal to" options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.conditionOperator = @">=";
-    } else if ([self.rawInputString rangeOfString:@"equal to"].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"equal to" options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.conditionOperator = @"==";
-    } else if ([self.rawInputString rangeOfString:@"less than"].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"less than" options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.conditionOperator = @"<";
-    } else if ([self.rawInputString rangeOfString:@"greater than"].location != NSNotFound) {
+    } else if ([self.rawInputString rangeOfString:@"greater than" options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.conditionOperator = @">";
     } else {
         NSLog(@"Condition operator not detected");
@@ -805,8 +823,8 @@ static SLSpeakIt *speaker = nil;
 - (void)findReplacementRange
 {
     // This method returns a general replacement range that can be used in other methods
-    NSRange replacementStartRange = [self.rawInputString rangeOfString:self.markBegin options:NSBackwardsSearch];
-    NSRange replacementEndRange = [self.rawInputString rangeOfString:self.markEnd options:NSBackwardsSearch];
+    NSRange replacementStartRange = [self.rawInputString rangeOfString:self.markBegin options:(NSBackwardsSearch | NSCaseInsensitiveSearch)];
+    NSRange replacementEndRange = [self.rawInputString rangeOfString:self.markEnd options:(NSBackwardsSearch | NSCaseInsensitiveSearch)];
     NSUInteger replacementLength = (replacementEndRange.location + self.markEnd.length) - (replacementStartRange.location);
     self.replacementRange = NSMakeRange(replacementStartRange.location, replacementLength);
 }
@@ -827,8 +845,10 @@ static SLSpeakIt *speaker = nil;
     // Based on the increment direction (up or down), transform the end point variable
     // into a condition operator plus the appropriate variable. This method allows use of
     // [array count] as an end point, if the array has been declared.
+    // Consider checking strings not with isEqualToString (case sensitive) but with
+    // if ([self.incrementDirection caseInsensitiveCompare:@"String"]==NSOrderedSame)
     if ([self.incrementDirection isEqualToString:@"up"]) {
-        if ([self.secondVarName rangeOfString:@" count"].location != NSNotFound) {
+        if ([self.secondVarName rangeOfString:@" count" options:NSCaseInsensitiveSearch].location != NSNotFound) {
             self.secondVarName = [self.secondVarName substringToIndex:[self.secondVarName length] - 6];
             if ([self.collectionsArray containsObject:self.secondVarName]) {
                 self.secondVarName = [NSString stringWithFormat:@"< [%@ count]", self.secondVarName];
@@ -836,14 +856,14 @@ static SLSpeakIt *speaker = nil;
                 self.translatedCodeString = [NSString stringWithFormat:@"// Warning: The collection %@ does not exist yet.\n\t", self.secondVarName];
                 NSLog(@"translatedCodeString is %@", self.translatedCodeString);
             }
-        } else if ([self.secondVarName rangeOfString:@", inclusive"].location != NSNotFound) {
+        } else if ([self.secondVarName rangeOfString:@", inclusive" options:NSCaseInsensitiveSearch].location != NSNotFound) {
             self.secondVarName = [self.secondVarName substringToIndex:[self.secondVarName length] - 11];
             self.secondVarName = [NSString stringWithFormat:@"<= %@", self.secondVarName];
         } else {
             self.secondVarName = [NSString stringWithFormat:@"< %@", self.secondVarName];
         }
     } else if ([self.incrementDirection isEqualToString:@"down"]) {
-        if ([self.secondVarName rangeOfString:@" count"].location != NSNotFound) {
+        if ([self.secondVarName rangeOfString:@" count" options:NSCaseInsensitiveSearch].location != NSNotFound) {
             self.secondVarName = [self.secondVarName substringToIndex:[self.secondVarName length] - 6];
             if ([self.collectionsArray containsObject:self.secondVarName]) {
                 self.secondVarName = [NSString stringWithFormat:@"> [%@ count]", self.secondVarName];
@@ -851,7 +871,7 @@ static SLSpeakIt *speaker = nil;
                 self.translatedCodeString = [NSString stringWithFormat:@"// Warning: The collection %@ does not exist yet.\n\t", self.secondVarName];
                 NSLog(@"translatedCodeString is %@", self.translatedCodeString);
             }
-        } else if ([self.secondVarName rangeOfString:@", inclusive"].location != NSNotFound) {
+        } else if ([self.secondVarName rangeOfString:@", inclusive" options:NSCaseInsensitiveSearch].location != NSNotFound) {
             self.secondVarName = [self.secondVarName substringToIndex:[self.secondVarName length] - 11];
             self.secondVarName = [NSString stringWithFormat:@">= %@", self.secondVarName];
         } else {
@@ -902,6 +922,8 @@ static SLSpeakIt *speaker = nil;
     self.previousInputArray = nil;
     self.translatedCodeString = nil;
     self.lineStart = nil;
+    self.lineEnd = nil;
+    self.varEqual = nil;
     // Consider storing array contents in NSUserDefaults here
     [self.onOffSwitch setTitle:@"Start SpeakIt"];
     [self.onOffSwitch setAction:@selector(didClickBeginSpeakIt:)];
