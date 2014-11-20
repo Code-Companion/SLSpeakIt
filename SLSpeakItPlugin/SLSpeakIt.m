@@ -392,54 +392,6 @@ static SLSpeakIt *speaker = nil;
     }
 }
 
-//- (void)createWhileLoop
-//{
-//    // For now, varName should be a previously declared variable
-//    // A warning is generated otherwise - where is warning generated?
-//    // Combine this method with createIfStatement and switch on self.lineStart for
-//    // setting the translatedCodeString?
-//    if ([self.rawInputString rangeOfString:@" variable is "].location != NSNotFound) {
-//        self.markBegin = self.lineStart;
-//        self.markEnd = @" variable is ";
-//        self.varName = [self findWildcardItemName];
-//        
-//        if ([self.rawInputString rangeOfString:@" end point "].location != NSNotFound) {
-//            self.markBegin = self.markEnd;
-//            self.markEnd = @" end point ";
-//            [self findConditionOperator];
-//            
-//            if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
-//                self.markBegin = self.markEnd;
-//                self.markEnd = @". Next.\n";
-//                [self findConditionLimit];
-//
-//            } else {
-//                NSLog(@"Loop condition end point not detected");
-//            }
-//        } else {
-//            NSLog(@"Loop condition operator not detected");
-//        }
-//        
-//    } else if ([self.rawInputString rangeOfString:@" exists. Next.\n"].location != NSNotFound) {
-//        self.markBegin = self.lineStart;
-//        self.markEnd = @" exists. Next.\n";
-//        self.varName = [self findWildcardItemName];
-//        self.translatedCodeString = [NSString stringWithFormat:@"while (%@) {\n\t\t//placeholder\n\t}", self.varName];
-//        [self replaceLineWithTranslatedCodeString];
-//        [self deletePlaceholder];
-//    
-//    } else if ([self.rawInputString rangeOfString:@" does not exist. Next.\n"].location != NSNotFound) {
-//        self.markBegin = self.lineStart;
-//        self.markEnd = @" does not exist. Next.\n";
-//        self.varName = [self findWildcardItemName];
-//        self.translatedCodeString = [NSString stringWithFormat:@"while (!%@) {\n\t\t//placeholder\n\t}", self.varName];
-//        [self replaceLineWithTranslatedCodeString];
-//        [self deletePlaceholder];
-//        
-//    } else {
-//        NSLog(@"Loop variable not detected");
-//    }
-//}
 
 - (void)getRandomFromArrayOrSet
 {
