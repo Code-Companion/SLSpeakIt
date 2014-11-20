@@ -16,8 +16,10 @@
 @property (strong, nonatomic) NSString *translatedCodeString;
 @property (strong, nonatomic) NSTextView *textView;
 @property (strong, nonatomic) NSString *lineStart;
+@property (strong, nonatomic) NSString *lineEnd;
 @property (strong, nonatomic) NSString *markBegin;
 @property (strong, nonatomic) NSString *markEnd;
+@property (strong, nonatomic) NSString *varEqual;
 @property (strong, nonatomic) NSString *wildcardItemName;
 @property (strong, nonatomic) NSString *varName;
 @property (strong, nonatomic) NSString *secondVarName;

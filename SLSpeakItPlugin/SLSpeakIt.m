@@ -54,6 +54,7 @@ static SLSpeakIt *speaker = nil;
     self.collectionsArray = [[NSMutableArray alloc] init];
     self.previousInputArray = [[NSMutableArray alloc] init];
     self.translatedCodeArray = [[NSMutableArray alloc] init];
+    self.lineEnd = @". Next.\n";
     NSLog(@"Started SpeakIt");
     [[NSNotificationCenter defaultCenter] addObserver:self
                                             selector:@selector(didChangeText:)
@@ -78,7 +79,7 @@ static SLSpeakIt *speaker = nil;
 - (void)tryReplacingStringWithCode
 {
     // case - create an integer variable
-    if ([self.rawInputString rangeOfString:@"Create an integer variable. Call it "].location != NSNotFound) {
+    if ([self.rawInputString rangeOfString:@"Create an integer variable. Call it " options:NSCaseInsensitiveSearch].location != NSNotFound) {
         self.lineStart = @"Create an integer variable. Call it ";
         [self setVariableNameAndValue];
     
@@ -499,18 +500,21 @@ static SLSpeakIt *speaker = nil;
 
 - (void)setVariableNameAndValue
 {
-    if ([self.rawInputString rangeOfString:@". Equal to "].location != NSNotFound) {
+    if ([self.rawInputString rangeOfString:@". Equal to " options:NSCaseInsensitiveSearch].location != NSNotFound) {
         // Find and set the variable name
+        // I feel like there are now extra variables here to ensure case insensitivity and more
+        // abstraction, see if I can pare this down
+        self.varEqual = @". Equal to ";
         self.markBegin = self.lineStart;
-        self.markEnd = @". Equal to ";
+        self.markEnd = self.varEqual;
         self.varName = [self findWildcardItemName];
         
         // If the variable has a value, find and set it
-        if ([self.rawInputString rangeOfString:@". Next.\n"].location != NSNotFound) {
+        if ([self.rawInputString rangeOfString:@". Next.\n" options:NSCaseInsensitiveSearch].location != NSNotFound) {
             // Find a way to allow variables without initial values. If "Call it" is
             // followed by ". Next.\n" this should be a separate case.
             self.markBegin = self.markEnd;
-            self.markEnd = @". Next.\n";
+            self.markEnd = self.lineEnd;
             self.secondVarName = [self findWildcardItemName];
             
             // Add the valid variable to the variables array
@@ -811,8 +815,8 @@ static SLSpeakIt *speaker = nil;
 {
     // This method returns a general wildcard that can be assigned to any local or global
     // variable name
-    NSRange varStartRange = [self.rawInputString rangeOfString:self.markBegin options:NSBackwardsSearch];
-    NSRange varEndRange = [self.rawInputString rangeOfString:self.markEnd options:NSBackwardsSearch];
+    NSRange varStartRange = [self.rawInputString rangeOfString:self.markBegin options:(NSBackwardsSearch | NSCaseInsensitiveSearch)];
+    NSRange varEndRange = [self.rawInputString rangeOfString:self.markEnd options:(NSBackwardsSearch | NSCaseInsensitiveSearch)];
     NSUInteger varLength = (varEndRange.location) - (varStartRange.location + self.markBegin.length);
     self.wildcardItemName = [self.rawInputString substringWithRange:NSMakeRange((varStartRange.location + self.markBegin.length), varLength)];
     return self.wildcardItemName;
@@ -870,12 +874,14 @@ static SLSpeakIt *speaker = nil;
 - (void)replaceLineWithTranslatedCodeString
 {
     // First we get the user's original input as a range in textStorage, so we can replace it with code.
-    NSRange lineRangeStart = [self.rawInputString rangeOfString:self.lineStart options:NSBackwardsSearch];
-    NSRange lineRangeEnd = [self.rawInputString rangeOfString:@". Next.\n" options:NSBackwardsSearch];
+    NSRange lineRangeStart = [self.rawInputString rangeOfString:self.lineStart options:(NSBackwardsSearch | NSCaseInsensitiveSearch)];
+    NSRange lineRangeEnd = [self.rawInputString rangeOfString:self.lineEnd options:(NSBackwardsSearch | NSCaseInsensitiveSearch)];
     NSUInteger lineRangeLength = (lineRangeEnd.location+7) - (lineRangeStart.location);
     NSRange replacementRange = NSMakeRange(lineRangeStart.location, lineRangeLength);
     
     // We store the user's original input in an array in case we need it.
+    // I'm not sure how useful this really is, do we need it or just the translatedCodeArray
+    // which should be sufficient
     self.previousInput = [self.rawInputString substringWithRange:replacementRange];
     [self.previousInputArray addObject:self.previousInput];
     
