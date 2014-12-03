@@ -28,7 +28,7 @@ Collection creation, population and selection
 + Create a mutable array. Call it [wildcard]. Next.
 + Create a set. Call it [wildcard]. Next.
 + Create a mutable set. Call it [wildcard]. Next.
-+ Put [wildcard] into collection [wildcard]. Next.
++ Put item [wildcard] into collection [wildcard]. Next.
 + Remove [wildcard] from collection [wildcard]. Next.
 + Random item from collection [wildcard]. Next.
 
@@ -36,7 +36,7 @@ Control flow
 -------------
 + Create a fast enumeration loop. For [wildcard] in collection [wildcard]. Next.
 + Create a for loop from start point [wildcard] to end point [wildcard], counting [up/down]. Next.
-+ Create a while loop. While [wildcard] variable is [operator] end point [type] [wildcard]. Next. 
++ Create a while loop. While [wildcard] variable is [operator] [type] [wildcard]. Next. 
 + Create a while loop. While [wildcard] [exists/does not exist]. Next.
 + Create an [if/else if] statement. [If/Else if] [wildcard] variable is [operator] [type] [wildcard]. Next.
 + Create an [if/else if] statement. [If/Else if] [wildcard] [exists/does not exist]. Next.
