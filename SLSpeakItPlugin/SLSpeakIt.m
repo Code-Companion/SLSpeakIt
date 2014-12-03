@@ -124,8 +124,8 @@ static SLSpeakIt *speaker = nil;
         [self setArrayOrSetName];
         
     // case - add to array or set
-    } else if ([self.rawInputString rangeOfString:@"Put " options:NSCaseInsensitiveSearch].location != NSNotFound) {
-        self.lineStart = @"Put ";
+    } else if ([self.rawInputString rangeOfString:@"Put item " options:NSCaseInsensitiveSearch].location != NSNotFound) {
+        self.lineStart = @"Put item ";
         [self addToArrayOrSet];
         
     // case - remove from array or set
@@ -135,6 +135,7 @@ static SLSpeakIt *speaker = nil;
 
     // case - get random object from array or set
     } else if ([self.rawInputString rangeOfString:@"Random item from collection " options:NSCaseInsensitiveSearch].location != NSNotFound) {
+        NSLog(@"Identified the lineStart Random item from collection ");
         self.lineStart = @"Random item from collection ";
         [self getRandomFromArrayOrSet];
         
@@ -239,7 +240,7 @@ static SLSpeakIt *speaker = nil;
             NSLog(@"No array or set name detected");
         }
     } else {
-        NSLog(@"No variable name detected");
+        NSLog(@"No variable name detected and method is %@", self.lineStart);
     }
 }
 
@@ -404,14 +405,18 @@ static SLSpeakIt *speaker = nil;
 - (void)getRandomFromArrayOrSet
 {
     if ([self.rawInputString rangeOfString:@". Next.\n" options:NSCaseInsensitiveSearch].location != NSNotFound) {
+        NSLog(@"Found Next command to begin transformation");
         self.markBegin = self.lineStart;
         self.markEnd = self.lineEnd;
         self.varName = [self findWildcardItemName];
+        NSLog(@"self.varName is a collection called %@", self.varName);
         
         // Call a method to replace on-screen text with code
         if ([self.collectionsArray containsObject:self.varName]) {
             self.translatedCodeString = [NSString stringWithFormat:@"NSInteger index = arc4random() %% [%@ count];\n\tid randomObject = [%@ objectAtIndex:index];\n\t", self.varName, self.varName];
+            NSLog(@"self.translatedCodeString is %@", self.translatedCodeString);
             self.translatedCodeString = [self.translatedCodeString stringByAppendingString:@"NSLog(@\"Random object selected is %@.\", randomObject);\n\t"];
+            NSLog(@"self.translatedCodeString is %@", self.translatedCodeString);
             [self replaceLineWithTranslatedCodeString];
         } else {
             self.translatedCodeString = [NSString stringWithFormat:@"// Warning: The collection %@ does not exist yet.\n\t", self.varName];
@@ -465,7 +470,7 @@ static SLSpeakIt *speaker = nil;
             NSLog(@"No array or set name detected");
         }
     } else {
-        NSLog(@"No variable name detected");
+        NSLog(@"No variable name detected and method is %@", self.lineStart);
     }
 }
 
@@ -894,7 +899,9 @@ static SLSpeakIt *speaker = nil;
 - (void)replaceLineWithTranslatedCodeString
 {
     // First we get the user's original input as a range in textStorage, so we can replace it with code.
+    NSLog(@"self.lineStart in replacement method is %@", self.lineStart);
     NSRange lineRangeStart = [self.rawInputString rangeOfString:self.lineStart options:(NSBackwardsSearch | NSCaseInsensitiveSearch)];
+    NSLog(@"self.lineEnd in replacement method is %@", self.lineEnd);
     NSRange lineRangeEnd = [self.rawInputString rangeOfString:self.lineEnd options:(NSBackwardsSearch | NSCaseInsensitiveSearch)];
     NSUInteger lineRangeLength = (lineRangeEnd.location+7) - (lineRangeStart.location);
     NSRange replacementRange = NSMakeRange(lineRangeStart.location, lineRangeLength);
@@ -904,7 +911,7 @@ static SLSpeakIt *speaker = nil;
     // which should be sufficient
     self.previousInput = [self.rawInputString substringWithRange:replacementRange];
     [self.previousInputArray addObject:self.previousInput];
-    
+    NSLog(@"self.previousInput is now %@", self.previousInput);
     // Then we replace the text on-screen with valid code and add the code to an array
     // of commands issued so far.
     [self.textView insertText:self.translatedCodeString replacementRange:replacementRange];
