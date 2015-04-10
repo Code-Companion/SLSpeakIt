@@ -32,6 +32,7 @@
 @property (strong, nonatomic) NSMutableArray *previousInputArray;
 @property (strong, nonatomic) NSMutableArray *variablesArray;
 @property (strong, nonatomic) NSMutableArray *collectionsArray;
+@property (assign) int progMode;
 
 - (void)tryReplacingStringWithCode;
 

@@ -55,6 +55,7 @@ static SLSpeakIt *speaker = nil;
     self.previousInputArray = [[NSMutableArray alloc] init];
     self.translatedCodeArray = [[NSMutableArray alloc] init];
     self.lineEnd = @". Next.\n";
+    self.progMode = 0;
     NSLog(@"Started SpeakIt");
     [[NSNotificationCenter defaultCenter] addObserver:self
                                             selector:@selector(didChangeText:)
@@ -189,6 +190,11 @@ static SLSpeakIt *speaker = nil;
         self.lineStart = @"Create an else statement";
         [self createElseStatement];
         
+    // case - change prog mode
+    } else if ([self.rawInputString rangeOfString:@"Change programming mode to " options:NSCaseInsensitiveSearch].location != NSNotFound) {
+        self.lineStart = @"Change programming mode to ";
+        [self changeProgrammingMode];
+        
     // For else if and if statements,
     // move the cursor to after the last if bracket and insert new code there
     
@@ -230,8 +236,17 @@ static SLSpeakIt *speaker = nil;
             
             // Call a method to replace on-screen text with code
             if ([self.variablesArray containsObject:self.varName] && [self.collectionsArray containsObject:self.secondVarName]) {
-                self.translatedCodeString = [NSString stringWithFormat:@"[%@ addObject:%@];\n\t", self.secondVarName, self.varName];
-                [self replaceLineWithTranslatedCodeString];
+                // Objective-C mode - test on 3/19
+                if (self.progMode == 0) {
+                    self.translatedCodeString = [NSString stringWithFormat:@"[%@ addObject:%@];\n\t", self.secondVarName, self.varName];
+                    [self replaceLineWithTranslatedCodeString];
+                // Swift mode - test on 3/19
+                } else if (self.progMode == 1) {
+                    self.translatedCodeString = [NSString stringWithFormat:@"%@.addObject(%@)", self.secondVarName, self.varName];
+                    [self replaceLineWithTranslatedCodeString];
+                } else {
+                    NSLog(@"Check the progMode");
+                }
             } else {
                 self.translatedCodeString = [NSString stringWithFormat:@"// Warning: The collection %@ or the variable %@ does not exist yet.\n\t", self.secondVarName, self.varName];
                 [self replaceLineWithTranslatedCodeString];
@@ -536,8 +551,17 @@ static SLSpeakIt *speaker = nil;
             // Call a method to replace on-screen text with code
             if ([self.lineStart isEqualToString:@"Create an integer variable. Call it "]) {
                 int variableValue = [self.secondVarName intValue];
-                self.translatedCodeString = [NSString stringWithFormat:@"int %@ = %d;\n\t", self.varName, variableValue];
-                [self replaceLineWithTranslatedCodeString];
+                NSLog(@"Starting progMode analysis...");
+                if (self.progMode == 0) {
+                    self.translatedCodeString = [NSString stringWithFormat:@"int %@ = %d;\n\t", self.varName, variableValue];
+                    [self replaceLineWithTranslatedCodeString];
+                } else if (self.progMode == 1) {
+                    self.translatedCodeString = [NSString stringWithFormat:@"var %@ = %d\n\t", self.varName, variableValue];
+                    [self replaceLineWithTranslatedCodeString];
+                } else {
+                    NSLog(@"Check the progmode");
+                }
+
             } else if ([self.lineStart isEqualToString:@"Create a float variable. Call it "]) {
                 float variableValue = [self.secondVarName floatValue];
                 self.translatedCodeString = [NSString stringWithFormat:@"float %@ = %f;\n\t", self.varName, variableValue];
@@ -637,6 +661,41 @@ static SLSpeakIt *speaker = nil;
         self.translatedCodeString = [self.translatedCodeArray lastObject];
     } else {
         NSLog(@"Undo not confirmed");
+    }
+}
+
+- (void)changeProgrammingMode
+{
+    if ([self.rawInputString rangeOfString:self.lineEnd options:NSCaseInsensitiveSearch].location != NSNotFound) {
+        // Find the name of the language to use (varName)
+        self.markBegin = self.lineStart;
+        self.markEnd = self.lineEnd;
+        self.varName = [self findWildcardItemName];
+        if ([self.varName rangeOfString:@"Objective-C" options:NSCaseInsensitiveSearch].location != NSNotFound && self.progMode != 0) {
+            self.progMode = 0;
+            self.translatedCodeString = [NSString stringWithFormat:@"// Changed programming mode to Objective-C.\n\t"];
+            [self replaceLineWithTranslatedCodeString];
+            NSLog(@"Changed programming mode to Objective-C");
+            // Add functionality here to reset the previousInputArray
+        } else if ([self.varName rangeOfString:@"Swift" options:NSCaseInsensitiveSearch].location != NSNotFound && self.progMode != 1) {
+            self.progMode = 1;
+            self.translatedCodeString = [NSString stringWithFormat:@"// Changed programming mode to Swift.\n\t"];
+            [self replaceLineWithTranslatedCodeString];
+            NSLog(@"Changed programming mode to Swift");
+            // Add functionality here to reset the previousInputArray
+        } else if ([self.varName rangeOfString:@"Objective-C" options:NSCaseInsensitiveSearch].location != NSNotFound && self.progMode == 0) {
+            // Post a warning that the user is already using Objective-C
+            self.translatedCodeString = [NSString stringWithFormat:@"// Warning: You are already using Objective-C.\n\t"];
+            [self replaceLineWithTranslatedCodeString];
+        } else if ([self.varName rangeOfString:@"Swift" options:NSCaseInsensitiveSearch].location != NSNotFound && self.progMode == 1) {
+            // Post a warning that the user is already using Swift
+            self.translatedCodeString = [NSString stringWithFormat:@"// Warning: You are already using Swift.\n\t"];
+            [self replaceLineWithTranslatedCodeString];
+        } else {
+            // Post a warning that the plugin does not support that language yet.
+            self.translatedCodeString = [NSString stringWithFormat:@"// Warning: That language is not an option yet."];
+            [self replaceLineWithTranslatedCodeString];
+        }
     }
 }
 
