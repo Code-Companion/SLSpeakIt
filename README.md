@@ -1,6 +1,6 @@
 SLSpeakIt
 =========
-An Xcode plugin that transforms text or voice input into valid code. This is pre-alpha software, do not expect perfection or even functionality! If you are using Yosemite, all bets are off.
+An Xcode plugin that transforms text or voice input into valid code. This is pre-alpha software, do not expect perfection or even functionality! It appears to work on Yosemite and Mavericks with Xcode 6.3, but you will need the "addswift" branch.
 
 In progress and welcome collaborators.
 
@@ -8,7 +8,7 @@ To install and start using the plugin
 --------------------------------------
 Download the plugin and open the SLSpeakIt.xcodeproj file in Xcode. Build and run it, then restart Xcode. You should see a new menu item ("Start SpeakIt") in Xcode's Edit menu. 
 
-Once the plugin is installed, open or create any Xcode file, choose "Start SpeakIt" from the Edit menu, and start coding in plain English! Type in the commands listed below, and the plugin will generate valid code (Objective-C at present). (Voice input also should work, but I need to build in more fuzziness to accept results that aren't exact matches for commands.) Please send any feedback to sunlovesystems@gmail.com 
+Once the plugin is installed, open or create any Xcode file, choose "Start SpeakIt" from the Edit menu, and start coding in plain English! Type in the commands listed below, and the plugin will generate valid code (Objective-C at present). UPDATE: Swift is being added and works for one command right now. (Voice input also works in the iOS version of this software, which functions differently.) Please send any feedback to sunlovesystems@gmail.com 
 
 --IMPORTANT-- **Commands may change.** This is pre-alpha software.
 
