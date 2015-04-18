@@ -195,6 +195,11 @@ static SLSpeakIt *speaker = nil;
         self.lineStart = @"Change programming mode to ";
         [self changeProgrammingMode];
         
+    // case - reset variable value
+    } else if ([self.rawInputString rangeOfString:@"Reset variable " options:NSCaseInsensitiveSearch].location != NSNotFound) {
+        self.lineStart = @"Reset variable ";
+        [self resetVariableValue];
+        
     // For else if and if statements,
     // move the cursor to after the last if bracket and insert new code there
     
@@ -490,8 +495,50 @@ static SLSpeakIt *speaker = nil;
 }
 
 - (void)resetVariableValue
+// Find a way to do type checking here on the variables - maybe store the variables WITH their type in variablesArray
+// and then check on that
 {
-    
+    if ([self.rawInputString rangeOfString:@" to new value " options:NSCaseInsensitiveSearch].location != NSNotFound) {
+        // Get the variable name to check
+        self.markBegin = self.lineStart;
+        self.markEnd = @" to new value ";
+        self.varName = [self findWildcardItemName];
+            
+        // Get the new value for the variable
+        if ([self.rawInputString rangeOfString:self.lineEnd options:NSCaseInsensitiveSearch].location != NSNotFound) {
+                
+            // Get the new value
+            self.markBegin = @" to new value ";
+            self.markEnd = self.lineEnd;
+            self.secondVarName = [self findWildcardItemName];
+            
+            // Check if that variable exists already
+            if ([self.variablesArray containsObject:self.varName]) {
+            
+                // If the variable exists, call a method to replace on-screen text with code
+                if (self.progMode == 0) {
+                    self.translatedCodeString = [NSString stringWithFormat:@"%@ = %@;\n\t", self.varName, self.secondVarName];
+                    [self replaceLineWithTranslatedCodeString];
+                } else if (self.progMode == 1) {
+                    self.translatedCodeString = [NSString stringWithFormat:@"%@ = %@\n\t", self.varName, self.secondVarName];
+                    [self replaceLineWithTranslatedCodeString];
+                } else {
+                    NSLog(@"Check the progMode");
+                }
+            
+            // If it does not exist already, put a warning on-screen instead
+            } else {
+                self.translatedCodeString = [NSString stringWithFormat:@"// Warning: The variable %@ does not exist yet.\n\t", self.varName];
+                [self replaceLineWithTranslatedCodeString];
+            }
+                
+        } else {
+            NSLog(@"New value of variable not found");
+        }
+        
+    } else {
+        NSLog(@"No new value detected for a variable");
+    }
 }
 
 - (void)setArrayOrSetName
@@ -525,7 +572,7 @@ static SLSpeakIt *speaker = nil;
                 self.translatedCodeString = [NSString stringWithFormat:@"NSMutableArray *%@ = [[NSMutableArray alloc] init];\n\t", self.varName];
                 [self replaceLineWithTranslatedCodeString];
             } else if (self.progMode == 1) {
-                self.translatedCodeString = [NSString stringWithFormat:@"// Warning: Swift does not support mutable arrays. Try an immutable array and then use arrayName.append() or arrayName += []"];
+                self.translatedCodeString = [NSString stringWithFormat:@"// Warning: Swift does not support mutable arrays. Try an immutable array and then use arrayName.append() or arrayName += []\n\t"];
                 [self replaceLineWithTranslatedCodeString];
             } else {
                 NSLog(@"Check the progMode");
@@ -548,7 +595,7 @@ static SLSpeakIt *speaker = nil;
                 self.translatedCodeString = [NSString stringWithFormat:@"NSMutableSet *%@ = [[NSMutableSet alloc] init];\n\t", self.varName];
                 [self replaceLineWithTranslatedCodeString];
             } else if (self.progMode == 1) {
-                self.translatedCodeString = [NSString stringWithFormat:@"// Warning: Swift does not support mutable sets. Try an immutable set with the syntax \"var setName = Set<type>()\" and then use setName.insert()"];
+                self.translatedCodeString = [NSString stringWithFormat:@"// Warning: Swift does not support mutable sets. Try an immutable set with the syntax \"var setName = Set<type>()\" and then use setName.insert()\n\t"];
                 [self replaceLineWithTranslatedCodeString];
             } else {
                 NSLog(@"Check the progMode");
@@ -707,6 +754,7 @@ static SLSpeakIt *speaker = nil;
     // Undo is buggy if the user has deleted text with the mouse and then re-inserted it
     // Also within a for loop if any "Undo" commands are issued. Undo needs to be much more
     // robust.
+    // Fixed in app - import fix to here
     if ([self.rawInputString rangeOfString:@". Next.\n" options:NSCaseInsensitiveSearch].location != NSNotFound) {
         // Find the replacement range.
         self.markBegin = self.translatedCodeString;
@@ -771,6 +819,8 @@ static SLSpeakIt *speaker = nil;
 {
     // This is extremely hacky and will be replaced at some point. But it works for now.
     // Except now it crashes the undo function, because it is hacky. This needs to be fixed.
+    // Fixed in app - import fix to here - may need to separate closed-bracket from first line of
+    // conditionals since plugin is inline. Check
     if ([self.rawInputString rangeOfString:@"//placeholder"].location != NSNotFound) {
         self.markBegin =@"//place";
         self.markEnd = @"holder";
@@ -1034,6 +1084,7 @@ static SLSpeakIt *speaker = nil;
     // We store the user's original input in an array in case we need it.
     // I'm not sure how useful this really is, do we need it or just the translatedCodeArray
     // which should be sufficient
+    // It turns out this IS useful for replays, do not get rid of it
     self.previousInput = [self.rawInputString substringWithRange:replacementRange];
     [self.previousInputArray addObject:self.previousInput];
     NSLog(@"self.previousInput is now %@", self.previousInput);
