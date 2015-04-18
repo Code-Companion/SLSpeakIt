@@ -495,6 +495,8 @@ static SLSpeakIt *speaker = nil;
 }
 
 - (void)setArrayOrSetName
+// This only creates empty collections; need a way to initialize collections with objects
+// Also consider adding dictionaries here or in a separate command
 {
     if ([self.rawInputString rangeOfString:@". Next.\n" options:NSCaseInsensitiveSearch].location != NSNotFound) {
         
@@ -508,21 +510,53 @@ static SLSpeakIt *speaker = nil;
         
         // Call a method to replace on-screen text with code
         if ([self.lineStart isEqualToString:@"Create an array. Call it "]) {
-            self.translatedCodeString = [NSString stringWithFormat:@"NSArray *%@ = [[NSArray alloc] init];\n\t", self.varName];
-            [self replaceLineWithTranslatedCodeString];
+            if (self.progMode == 0) {
+                self.translatedCodeString = [NSString stringWithFormat:@"NSArray *%@ = [[NSArray alloc] init];\n\t", self.varName];
+                [self replaceLineWithTranslatedCodeString];
+            } else if (self.progMode == 1) {
+                self.translatedCodeString = [NSString stringWithFormat:@"var %@ = []\n\t", self.varName];
+                [self replaceLineWithTranslatedCodeString];
+            } else {
+                NSLog(@"Check the progMode");
+            }
+            
         } else if ([self.lineStart isEqualToString:@"Create a mutable array. Call it "]) {
-            self.translatedCodeString = [NSString stringWithFormat:@"NSMutableArray *%@ = [[NSMutableArray alloc] init];\n\t", self.varName];
-            [self replaceLineWithTranslatedCodeString];
+            if (self.progMode == 0) {
+                self.translatedCodeString = [NSString stringWithFormat:@"NSMutableArray *%@ = [[NSMutableArray alloc] init];\n\t", self.varName];
+                [self replaceLineWithTranslatedCodeString];
+            } else if (self.progMode == 1) {
+                self.translatedCodeString = [NSString stringWithFormat:@"// Warning: Swift does not support mutable arrays. Try an immutable array and then use arrayName.append() or arrayName += []"];
+                [self replaceLineWithTranslatedCodeString];
+            } else {
+                NSLog(@"Check the progMode");
+            }
+            
         } else if ([self.lineStart isEqualToString:@"Create a set. Call it "]) {
-            self.translatedCodeString = [NSString stringWithFormat:@"NSSet *%@ = [[NSSet alloc] init];\n\t", self.varName];
-            [self replaceLineWithTranslatedCodeString];
+            if (self.progMode == 0) {
+                self.translatedCodeString = [NSString stringWithFormat:@"NSSet *%@ = [[NSSet alloc] init];\n\t", self.varName];
+                [self replaceLineWithTranslatedCodeString];
+            } else if (self.progMode == 1) {
+                // Consider adding a line of guidance that tells them to specify the set type between carets - or change the input to accept a type if in Swift mode
+                self.translatedCodeString = [NSString stringWithFormat:@"var %@ = Set<insertTypeHere>()\n\t", self.varName];
+                [self replaceLineWithTranslatedCodeString];
+            } else {
+                NSLog(@"Check the progMode");
+            }
+            
         } else if ([self.lineStart isEqualToString:@"Create a mutable set. Call it "]) {
-            self.translatedCodeString = [NSString stringWithFormat:@"NSMutableSet *%@ = [[NSMutableSet alloc] init];\n\t", self.varName];
-            [self replaceLineWithTranslatedCodeString];
+            if (self.progMode == 0) {
+                self.translatedCodeString = [NSString stringWithFormat:@"NSMutableSet *%@ = [[NSMutableSet alloc] init];\n\t", self.varName];
+                [self replaceLineWithTranslatedCodeString];
+            } else if (self.progMode == 1) {
+                self.translatedCodeString = [NSString stringWithFormat:@"// Warning: Swift does not support mutable sets. Try an immutable set with the syntax \"var setName = Set<type>()\" and then use setName.insert()"];
+                [self replaceLineWithTranslatedCodeString];
+            } else {
+                NSLog(@"Check the progMode");
+            }
         }
         
     } else {
-        NSLog(@"Array name not detected");
+        NSLog(@"Array or set name not detected");
     }
 }
 
