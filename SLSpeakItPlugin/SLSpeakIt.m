@@ -527,11 +527,10 @@ static SLSpeakIt *speaker = nil;
 }
 
 - (void)setVariableNameAndValue
+// You can't initialize empty variables yet, they must be declared with a value
 {
     if ([self.rawInputString rangeOfString:@". Equal to " options:NSCaseInsensitiveSearch].location != NSNotFound) {
         // Find and set the variable name
-        // I feel like there are now extra variables here to ensure case insensitivity and more
-        // abstraction, see if I can pare this down
         self.varEqual = @". Equal to ";
         self.markBegin = self.lineStart;
         self.markEnd = self.varEqual;
@@ -559,24 +558,57 @@ static SLSpeakIt *speaker = nil;
                     self.translatedCodeString = [NSString stringWithFormat:@"var %@ = %d\n\t", self.varName, variableValue];
                     [self replaceLineWithTranslatedCodeString];
                 } else {
-                    NSLog(@"Check the progmode");
+                    NSLog(@"Check the progMode");
                 }
 
             } else if ([self.lineStart isEqualToString:@"Create a float variable. Call it "]) {
                 float variableValue = [self.secondVarName floatValue];
-                self.translatedCodeString = [NSString stringWithFormat:@"float %@ = %f;\n\t", self.varName, variableValue];
-                [self replaceLineWithTranslatedCodeString];
+                if (self.progMode == 0) {
+                    self.translatedCodeString = [NSString stringWithFormat:@"float %@ = %f;\n\t", self.varName, variableValue];
+                    [self replaceLineWithTranslatedCodeString];
+                } else if (self.progMode == 1) {
+                    self.translatedCodeString = [NSString stringWithFormat:@"var %@ = %f\n\t", self.varName, variableValue];
+                    [self replaceLineWithTranslatedCodeString];
+                } else {
+                    NSLog(@"Check the progMode");
+                }
+                
             } else if ([self.lineStart isEqualToString:@"Create a double variable. Call it "]) {
                 double variableValue = [self.secondVarName doubleValue];
-                self.translatedCodeString = [NSString stringWithFormat:@"double %@ = %f;\n\t", self.varName, variableValue];
-                [self replaceLineWithTranslatedCodeString];
+                if (self.progMode == 0) {
+                    self.translatedCodeString = [NSString stringWithFormat:@"double %@ = %f;\n\t", self.varName, variableValue];
+                    [self replaceLineWithTranslatedCodeString];
+                } else if (self.progMode == 1) {
+                    self.translatedCodeString = [NSString stringWithFormat:@"var %@ = %f\n\t", self.varName, variableValue];
+                    [self replaceLineWithTranslatedCodeString];
+                } else {
+                    NSLog(@"Check the progMode");
+                }
+                
+                
             } else if ([self.lineStart isEqualToString:@"Create a string variable. Call it "]) {
-                self.translatedCodeString = [NSString stringWithFormat:@"NSString *%@ = @\"%@\";\n\t", self.varName, self.secondVarName];
-                [self replaceLineWithTranslatedCodeString];
+                if (self.progMode == 0) {
+                    self.translatedCodeString = [NSString stringWithFormat:@"NSString *%@ = @\"%@\";\n\t", self.varName, self.secondVarName];
+                    [self replaceLineWithTranslatedCodeString];
+                } else if (self.progMode == 1) {
+                    self.translatedCodeString = [NSString stringWithFormat:@"var %@ = \"%@\"\n\t", self.varName, self.secondVarName];
+                    [self replaceLineWithTranslatedCodeString];
+                } else {
+                    NSLog(@"Check the progMode");
+                }
+                
             } else if ([self.lineStart isEqualToString:@"Create an unsigned integer variable. Call it "]) {
                 NSUInteger variableValue = [self.secondVarName intValue];
-                self.translatedCodeString = [NSString stringWithFormat:@"NSUInteger %@ = %lu;\n\t", self.varName, (unsigned long)variableValue];
-                [self replaceLineWithTranslatedCodeString];
+                if (self.progMode == 0) {
+                    self.translatedCodeString = [NSString stringWithFormat:@"NSUInteger %@ = %lu;\n\t", self.varName, (unsigned long)variableValue];
+                    [self replaceLineWithTranslatedCodeString];
+                } else if (self.progMode == 1) {
+                    self.translatedCodeString = [NSString stringWithFormat:@"var %@: UInt = %lu\n\t", self.varName, (unsigned long)variableValue];
+                    [self replaceLineWithTranslatedCodeString];
+                } else {
+                    NSLog(@"Check the progMode");
+                }
+                
             } else {
                 NSLog(@"Could not translate variable name into value of correct type");
             }
