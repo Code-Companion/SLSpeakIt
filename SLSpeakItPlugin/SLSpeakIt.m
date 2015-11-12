@@ -31,9 +31,20 @@ static SLSpeakIt *speaker = nil;
 - (id)init
 {
     if (self = [super init]) {
-        [self addMenuItems];
+        // This worked - required change because plugins are now loaded earlier
+        // before other functionality is available. So we have to wait for
+        // applicationDidFinishLaunching before we can add menu items.
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(applicationDidFinishLaunching:)
+                                                     name:NSApplicationDidFinishLaunchingNotification
+                                                   object:nil];
     }
     return self;
+}
+
+- (void)applicationDidFinishLaunching:(NSNotification*)notification {
+    // Now we can add menu items
+    [self addMenuItems];
 }
 
 - (void)addMenuItems {
